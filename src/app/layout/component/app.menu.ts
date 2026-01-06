@@ -186,12 +186,12 @@ export class AppMenu {
                     {
                         label: 'Verified Payments',
                         icon: 'pi pi-fw pi-check',
-                        routerLink: ['/admin/payments/verified']
+                        routerLink: ['/pages/admin/payments/verified']
                     },
                     {
                         label: 'Payment History',
                         icon: 'pi pi-fw pi-history',
-                        routerLink: ['/admin/payments/history']
+                        routerLink: ['/pages/admin/payments/history']
                     }
                 ]
             },
