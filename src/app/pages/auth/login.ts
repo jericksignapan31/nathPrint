@@ -148,7 +148,8 @@ export class Login {
                 },
                 error: (error) => {
                     this.loading = false;
-                    this.errorMessage = this.getErrorMessage(error.code);
+                    console.error('Login failed', error);
+                    this.errorMessage = this.getErrorMessage(error.code || error.message || '');
                 }
             });
         }
@@ -191,14 +192,17 @@ export class Login {
             case 'auth/user-disabled':
                 return 'This account has been disabled';
             case 'auth/user-not-found':
+            case 'EMAIL_NOT_FOUND':
                 return 'No account found with this email';
             case 'auth/wrong-password':
+            case 'INVALID_PASSWORD':
                 return 'Incorrect password';
             case 'auth/email-already-in-use':
                 return 'Email already registered';
             case 'auth/weak-password':
                 return 'Password should be at least 6 characters';
             case 'auth/invalid-credential':
+            case 'INVALID_LOGIN_CREDENTIALS':
                 return 'Invalid email or password';
             default:
                 return 'Login failed. Please try again.';

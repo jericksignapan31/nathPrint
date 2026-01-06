@@ -37,6 +37,7 @@ export class AppMenu {
 
     buildMenu(role: string) {
         if (role === 'admin') {
+            // Admin sees admin menu only
             this.model = this.getAdminMenu();
         } else {
             this.model = this.getCustomerMenu();

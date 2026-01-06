@@ -26,8 +26,6 @@ export class UserService {
                         return of(null);
                     }
 
-                    const fallback = this.mapAuthUser(authUser);
-
                     // Try to fetch existing user doc
                     return this.getUserData(authUser.uid).pipe(
                         switchMap((userData) => {
@@ -40,14 +38,14 @@ export class UserService {
                             return this.createUser(authUser, 'customer').pipe(
                                 switchMap(() => this.getUserData(authUser.uid)),
                                 catchError((err) => {
-                                    console.error('[UserService] createUser failed, using fallback user', err);
-                                    return of(fallback);
+                                    console.error('[UserService] createUser failed', err);
+                                    return of(null);
                                 })
                             );
                         }),
                         catchError((err) => {
-                            console.error('[UserService] getUserData failed, using fallback user', err);
-                            return of(fallback);
+                            console.error('[UserService] getUserData failed', err);
+                            return of(null);
                         })
                     );
                 })
@@ -66,15 +64,18 @@ export class UserService {
     // Create user document in Firestore (called after registration)
     createUser(authUser: FirebaseAuthUser, role: UserRole = 'customer'): Observable<void> {
         const userRef = doc(this.firestore, this.collectionName, authUser.uid);
-        const userData = {
+        const userData: any = {
             uid: authUser.uid,
             email: authUser.email || '',
             name: authUser.displayName || authUser.email?.split('@')[0] || 'User',
             role: role,
-            photoURL: authUser.photoURL || undefined,
             createdAt: Timestamp.now(),
             updatedAt: Timestamp.now()
         };
+
+        if (authUser.photoURL) {
+            userData.photoURL = authUser.photoURL;
+        }
 
         return from(setDoc(userRef, userData));
     }
@@ -113,19 +114,6 @@ export class UserService {
     // Get current user data value
     get currentUserDataValue(): User | null {
         return this.currentUserData$.value;
-    }
-
-    // Map Firebase auth user to our User shape for fallback cases
-    private mapAuthUser(authUser: FirebaseAuthUser): User {
-        return {
-            uid: authUser.uid,
-            email: authUser.email || '',
-            name: authUser.displayName || authUser.email?.split('@')[0] || 'User',
-            role: 'customer',
-            photoURL: authUser.photoURL || undefined,
-            createdAt: new Date(),
-            updatedAt: new Date()
-        };
     }
 
     // Get user role
