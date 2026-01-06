@@ -11,6 +11,7 @@ export interface PrintOptions {
     colorMode: ColorMode;
     paperType: PaperType;
     copies: number;
+    pages: number;
     orientation?: Orientation;
     pickupDateTime?: Date;
     note?: string;

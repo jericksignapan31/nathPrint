@@ -10,6 +10,8 @@ import { TextareaModule } from 'primeng/textarea';
 import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
 import { SelectButtonModule } from 'primeng/selectbutton';
+import { OrdersService } from '@/app/services/orders.service';
+import { Order, PaperSize, ColorMode, PaperType, PaymentMethod } from '@/app/models';
 
 @Component({
     selector: 'app-new-order',
@@ -84,6 +86,10 @@ import { SelectButtonModule } from 'primeng/selectbutton';
                                 <p-selectbutton [options]="paperTypes" [(ngModel)]="paperType" optionLabel="label" optionValue="value" styleClass="w-full" style="gap: 0.5rem; display: flex;"></p-selectbutton>
                             </div>
                             <div class="field mb-3">
+                                <label class="font-semibold block mb-2">No. of Pages</label>
+                                <p-inputNumber class="w-full" [(ngModel)]="pages" [min]="1" [max]="10000"></p-inputNumber>
+                            </div>
+                            <div class="field mb-3">
                                 <label class="font-semibold block mb-2">Copies</label>
                                 <p-inputNumber class="w-full" [(ngModel)]="copies" [min]="1" [max]="1000"></p-inputNumber>
                             </div>
@@ -100,7 +106,7 @@ import { SelectButtonModule } from 'primeng/selectbutton';
                                 <div class="text-center mb-3">
                                     <p class="text-primary font-semibold text-lg mb-3">Estimated Total</p>
                                     <div class="bg-white border-2 border-primary border-round p-3 mb-3">
-                                        <p class="text-5xl font-bold text-primary m-0">{{ paymentAmount || 0 | currency: 'PHP' : 'symbol' : '1.2-2' }}</p>
+                                        <p class="text-5xl font-bold text-primary m-0">{{ getEstimatedTotal() | currency: 'PHP' : 'symbol' : '1.2-2' }}</p>
                                     </div>
                                 </div>
                                 <div class="text-sm text-muted-color">
@@ -140,7 +146,7 @@ import { SelectButtonModule } from 'primeng/selectbutton';
                             </div>
                             <div class="field mb-3">
                                 <label class="font-semibold block mb-2">Amount</label>
-                                <p-inputNumber class="w-full" [(ngModel)]="paymentAmount" mode="currency" currency="PHP" locale="en-PH"></p-inputNumber>
+                                <p-inputNumber class="w-full" [ngModel]="getEstimatedTotal()" mode="currency" currency="PHP" locale="en-PH" [disabled]="true"></p-inputNumber>
                             </div>
                         </p-card>
                     </div>
@@ -148,7 +154,7 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 
                 <div style="margin-top: 2rem; display: flex; gap: 0.5rem; justify-content: space-between;">
                     <p-button label="Back to Dashboard" severity="secondary" icon="pi pi-home" (onClick)="onCancel()"></p-button>
-                    <p-button label="Submit Order" severity="success" icon="pi pi-check" (onClick)="onSubmit()" [disabled]="!isFormValid() || isSubmitting"></p-button>
+                    <p-button label="Submit Order" severity="success" icon="pi pi-check" (onClick)="onSubmit()"></p-button>
                 </div>
             </p-card>
         </div>
@@ -160,6 +166,7 @@ export class NewOrderComponent {
     uploads: { name: string; size: number; file: File }[] = [];
 
     router = inject(Router);
+    ordersService = inject(OrdersService);
 
     paymentMethods = [
         { label: 'GCash', value: 'gcash' },
@@ -188,6 +195,7 @@ export class NewOrderComponent {
     paperSize: string | null = null;
     colorMode: string | null = null;
     paperType: string | null = null;
+    pages = 1;
     copies = 1;
     note = '';
     pickupDateTime: Date | null = null;
@@ -230,12 +238,18 @@ export class NewOrderComponent {
         this.uploads = this.uploads.filter((f) => f.name !== name);
     }
 
+    getEstimatedTotal(): number {
+        const pages = this.pages || 0;
+        const copies = this.copies || 0;
+        return pages * copies * 1; // 1 peso per page
+    }
+
     isFormValid(): boolean {
-        const hasFiles = this.uploads.length > 0;
-        const hasPrint = !!this.paperSize && !!this.colorMode && !!this.paperType && this.copies >= 1;
-        const hasPayment = !!this.paymentMethod && !!this.paymentAmount && this.paymentAmount > 0;
+        const hasPrint = !!this.paperSize && !!this.colorMode && !!this.paperType && this.copies >= 1 && this.pages >= 1;
+        const total = this.getEstimatedTotal();
+        const hasPayment = !!this.paymentMethod && total > 0;
         const gcashOk = this.paymentMethod === 'gcash' ? !!this.paymentReference?.trim() : true;
-        return hasFiles && hasPrint && hasPayment && gcashOk;
+        return hasPrint && hasPayment && gcashOk;
     }
 
     formatSize(bytes: number): string {
@@ -259,28 +273,66 @@ export class NewOrderComponent {
     }
 
     onSubmit() {
+        if (!this.isFormValid()) {
+            alert('Please complete required fields before submitting.');
+            return;
+        }
+
         this.isSubmitting = true;
 
-        // TODO: Implement order submission logic
-        console.log('Submitting order...', {
-            uploads: this.uploads,
-            pickupDateTime: this.pickupDateTime,
-            paperSize: this.paperSize,
-            colorMode: this.colorMode,
-            paperType: this.paperType,
-            copies: this.copies,
-            note: this.note,
-            paymentMethod: this.paymentMethod,
-            paymentReference: this.paymentReference,
-            paymentAmount: this.paymentAmount,
-            receiptFile: this.receiptFile
-        });
+        const total = this.getEstimatedTotal();
 
-        // Simulate API call - remove this after implementing real submission
-        setTimeout(() => {
-            this.isSubmitting = false;
-            alert('Order submitted successfully!');
-        }, 2000);
+        const printOptions: Order['printOptions'] = {
+            paperSize: this.paperSize as PaperSize,
+            colorMode: this.colorMode as ColorMode,
+            paperType: this.paperType as PaperType,
+            copies: this.copies,
+            pages: this.pages
+        };
+
+        if (this.pickupDateTime) {
+            printOptions.pickupDateTime = this.pickupDateTime;
+        }
+        if (this.note && this.note.trim().length > 0) {
+            printOptions.note = this.note.trim();
+        }
+
+        const payment: Order['payment'] = {
+            paymentMethod: this.paymentMethod as PaymentMethod,
+            amount: total,
+            status: 'pending'
+        };
+        if (this.paymentReference && this.paymentReference.trim().length > 0) {
+            payment.referenceNo = this.paymentReference.trim();
+        }
+
+        const order: Omit<Order, 'orderId' | 'createdAt' | 'updatedAt'> = {
+            userId: 'guest',
+            serviceId: 'print',
+            status: 'pending',
+            documents: this.uploads.map((f, idx) => ({
+                documentId: `local-${idx}-${Date.now()}`,
+                fileName: f.name,
+                fileSize: f.size,
+                uploadedAt: new Date()
+            })),
+            printOptions,
+            payment,
+            totalAmount: total
+        };
+
+        this.ordersService.createOrder(order).subscribe({
+            next: (orderId) => {
+                this.isSubmitting = false;
+                alert('Order submitted! Reference: ' + orderId);
+                this.router.navigate(['/dashboard']);
+            },
+            error: (err) => {
+                console.error('Order submission failed', err);
+                this.isSubmitting = false;
+                alert('Failed to submit order. Please try again.');
+            }
+        });
     }
 
     onCancel() {
