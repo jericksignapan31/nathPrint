@@ -29,10 +29,6 @@ export class AppMenu {
     ) {}
 
     ngOnInit() {
-        // Show guest menu immediately
-        this.model = this.getGuestMenu();
-        this.cdr.markForCheck();
-
         // Listen to user role changes
         this.userService.getUserRole().subscribe((role) => {
             this.buildMenu(role);
@@ -42,10 +38,8 @@ export class AppMenu {
     buildMenu(role: string) {
         if (role === 'admin') {
             this.model = this.getAdminMenu();
-        } else if (role === 'customer') {
-            this.model = this.getCustomerMenu();
         } else {
-            this.model = this.getGuestMenu();
+            this.model = this.getCustomerMenu();
         }
         this.cdr.markForCheck();
     }
@@ -266,31 +260,6 @@ export class AppMenu {
                         label: 'Settings',
                         icon: 'pi pi-fw pi-cog',
                         routerLink: ['/pages/settings']
-                    }
-                ]
-            }
-        ];
-    }
-
-    getGuestMenu(): MenuItem[] {
-        return [
-            {
-                label: 'Welcome',
-                items: [
-                    {
-                        label: 'Home',
-                        icon: 'pi pi-fw pi-home',
-                        routerLink: ['/landing']
-                    },
-                    {
-                        label: 'Sign In',
-                        icon: 'pi pi-fw pi-sign-in',
-                        routerLink: ['/auth/login']
-                    },
-                    {
-                        label: 'Sign Up',
-                        icon: 'pi pi-fw pi-user-plus',
-                        routerLink: ['/auth/signup']
                     }
                 ]
             }
