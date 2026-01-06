@@ -80,11 +80,27 @@ import { SelectButtonModule } from 'primeng/selectbutton';
                         <p-card header="Payments" [ngStyle]="{ height: '100%', padding: '1.5rem' }">
                             <div class="field mb-3">
                                 <label class="font-semibold block mb-2">Payment Method</label>
-                                <p-select [options]="paymentMethods" [(ngModel)]="paymentMethod" placeholder="Select method" optionLabel="label" optionValue="value" styleClass="w-full"></p-select>
+                                <p-selectbutton [options]="paymentMethods" [(ngModel)]="paymentMethod" optionLabel="label" optionValue="value" styleClass="w-full" style="gap: 0.5rem; display: flex;"></p-selectbutton>
                             </div>
-                            <div class="field mb-3">
+                            <div class="field mb-3" *ngIf="paymentMethod === 'gcash'">
+                                <div class="bg-surface-section p-4 border-round text-center">
+                                    <p class="text-sm text-muted-color mb-3">GCash QR Code</p>
+                                    <div class="bg-white p-3 border-round" style="display: inline-block;">
+                                        <img src="https://ph-live-01.slatic.net/p/431d72655ec8a91a622bf6bf445b9c95.jpg" alt="GCash QR Code" style="width: 200px; height: 200px; object-fit: contain;" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="field mb-3" *ngIf="paymentMethod === 'gcash'">
                                 <label class="font-semibold block mb-2">Reference No. (optional)</label>
                                 <input pInputText class="w-full" [(ngModel)]="paymentReference" placeholder="e.g., GCash ref or receipt ID" />
+                            </div>
+                            <div class="field mb-3" *ngIf="paymentMethod === 'gcash'">
+                                <label class="font-semibold block mb-2">Receipt Upload (optional)</label>
+                                <div class="surface-border border-2 border-dashed border-round p-3 text-center">
+                                    <input #receiptInput type="file" accept=".pdf,.jpg,.jpeg,.png" class="hidden" (change)="onReceiptSelect($event)" />
+                                    <p-button label="Upload Receipt" icon="pi pi-upload" size="small" (onClick)="receiptInput.click()" [disabled]="!paymentReference"></p-button>
+                                    <p *ngIf="receiptFile" class="text-sm text-muted-color mt-2 mb-0">{{ receiptFile.name }} ({{ formatSize(receiptFile.size) }})</p>
+                                </div>
                             </div>
                             <div class="field mb-3">
                                 <label class="font-semibold block mb-2">Amount</label>
@@ -108,6 +124,7 @@ export class NewOrderComponent {
     paymentMethod: string | null = null;
     paymentReference = '';
     paymentAmount: number | null = null;
+    receiptFile: File | null = null;
 
     paperSizes = [
         { label: 'A4', value: 'A4' },
@@ -175,5 +192,17 @@ export class NewOrderComponent {
         if (kb < 1024) return `${kb.toFixed(1)} KB`;
         const mb = kb / 1024;
         return `${mb.toFixed(1)} MB`;
+    }
+
+    onReceiptSelect(event: Event) {
+        const input = event.target as HTMLInputElement;
+        if (!input.files) return;
+        const file = input.files[0];
+        const allowedExt = ['pdf', 'jpg', 'jpeg', 'png'];
+        const ext = file.name.split('.').pop()?.toLowerCase();
+        if (ext && allowedExt.includes(ext)) {
+            this.receiptFile = file;
+        }
+        input.value = '';
     }
 }
