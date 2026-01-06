@@ -7,11 +7,23 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
+import { SelectButtonModule } from 'primeng/selectbutton';
 
 @Component({
     selector: 'app-new-order',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterModule, CardModule, ButtonModule, InputTextModule, InputNumberModule, SelectModule],
+    imports: [CommonModule, FormsModule, RouterModule, CardModule, ButtonModule, InputTextModule, InputNumberModule, SelectModule, DatePickerModule, SelectButtonModule],
+    styles: [
+        `
+            ::ng-deep .p-selectbutton .p-button {
+                transition: all 0.2s;
+            }
+            ::ng-deep .p-selectbutton .p-button:hover:not(.p-highlight) {
+                background-color: var(--surface-hover);
+            }
+        `
+    ],
     template: `
         <div class="card">
             <p-card header="Upload document (PDF/DOC/DOCX)" styleClass="mb-4">
@@ -33,9 +45,30 @@ import { SelectModule } from 'primeng/select';
                     </ul>
                 </div>
 
-                <div class="grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+                <div class="grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem; min-height: 500px;">
                     <div>
-                        <p-card header="Payments" styleClass="h-full">
+                        <p-card header="Print Options" [ngStyle]="{ height: '100%', padding: '1.5rem' }">
+                            <div class="field mb-3">
+                                <label class="font-semibold block mb-2">Preferred Pickup Date & Time (Optional)</label>
+                                <p-datepicker [(ngModel)]="pickupDateTime" [showTime]="true" [showIcon]="true" placeholder="Select date and time" styleClass="w-full" hourFormat="12"></p-datepicker>
+                            </div>
+                            <div class="field mb-3">
+                                <label class="font-semibold block mb-2">Paper Size</label>
+                                <p-selectbutton [options]="paperSizes" [(ngModel)]="paperSize" optionLabel="label" optionValue="value" styleClass="w-full" style="gap: 0.5rem; display: flex;"></p-selectbutton>
+                            </div>
+                            <div class="field mb-3">
+                                <label class="font-semibold block mb-2">Color Mode</label>
+                                <p-select [options]="colorModes" [(ngModel)]="colorMode" placeholder="Select mode" styleClass="w-full"></p-select>
+                            </div>
+                            <div class="field mb-3">
+                                <label class="font-semibold block mb-2">Copies</label>
+                                <p-inputNumber class="w-full" [(ngModel)]="copies" [min]="1" [max]="1000"></p-inputNumber>
+                            </div>
+                        </p-card>
+                    </div>
+
+                    <div>
+                        <p-card header="Payments" [ngStyle]="{ height: '100%', padding: '1.5rem' }">
                             <div class="field mb-3">
                                 <label class="font-semibold block mb-2">Payment Method</label>
                                 <p-select [options]="paymentMethods" [(ngModel)]="paymentMethod" placeholder="Select method" optionLabel="label" optionValue="value" styleClass="w-full"></p-select>
@@ -47,23 +80,6 @@ import { SelectModule } from 'primeng/select';
                             <div class="field mb-3">
                                 <label class="font-semibold block mb-2">Amount</label>
                                 <p-inputNumber class="w-full" [(ngModel)]="paymentAmount" mode="currency" currency="PHP" locale="en-PH"></p-inputNumber>
-                            </div>
-                        </p-card>
-                    </div>
-
-                    <div>
-                        <p-card header="Print Options" styleClass="h-full">
-                            <div class="field mb-3">
-                                <label class="font-semibold block mb-2">Paper Size</label>
-                                <p-select [options]="paperSizes" [(ngModel)]="paperSize" placeholder="Select size" styleClass="w-full"></p-select>
-                            </div>
-                            <div class="field mb-3">
-                                <label class="font-semibold block mb-2">Color Mode</label>
-                                <p-select [options]="colorModes" [(ngModel)]="colorMode" placeholder="Select mode" styleClass="w-full"></p-select>
-                            </div>
-                            <div class="field mb-3">
-                                <label class="font-semibold block mb-2">Copies</label>
-                                <p-inputNumber class="w-full" [(ngModel)]="copies" [min]="1" [max]="1000"></p-inputNumber>
                             </div>
                         </p-card>
                     </div>
@@ -84,11 +100,17 @@ export class NewOrderComponent {
     paymentReference = '';
     paymentAmount: number | null = null;
 
-    paperSizes = ['A4', 'Letter', 'Legal', 'A3'];
+    paperSizes = [
+        { label: 'A4', value: 'A4' },
+        { label: 'Letter', value: 'Letter' },
+        { label: 'Legal', value: 'Legal' },
+        { label: 'A3', value: 'A3' }
+    ];
     colorModes = ['Black & White', 'Color'];
     paperSize: string | null = null;
     colorMode: string | null = null;
     copies = 1;
+    pickupDateTime: Date | null = null;
     onDragOver(event: DragEvent) {
         event.preventDefault();
         this.isDragOver = true;

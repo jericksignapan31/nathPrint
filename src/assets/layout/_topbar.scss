@@ -48,7 +48,7 @@
         transition: background-color var(--element-transition-duration);
         cursor: pointer;
 
-        &:hover {
+        &:hover:not(.layout-topbar-action-highlight) {
             background-color: var(--surface-hover);
         }
 
