@@ -11,6 +11,7 @@ import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { OrdersService } from '@/app/services/orders.service';
+import { UserService } from '@/app/services/user.service';
 import { Order, PaperSize, ColorMode, PaperType, PaymentMethod } from '@/app/models';
 
 @Component({
@@ -167,6 +168,7 @@ export class NewOrderComponent {
 
     router = inject(Router);
     ordersService = inject(OrdersService);
+    userService = inject(UserService);
 
     paymentMethods = [
         { label: 'GCash', value: 'gcash' },
@@ -306,8 +308,12 @@ export class NewOrderComponent {
             payment.referenceNo = this.paymentReference.trim();
         }
 
+        // Get current user ID or use 'guest'
+        const currentUser = this.userService.currentUserDataValue;
+        const userId = currentUser?.uid || 'guest';
+
         const order: Omit<Order, 'orderId' | 'createdAt' | 'updatedAt'> = {
-            userId: 'guest',
+            userId: userId,
             serviceId: 'print',
             status: 'pending',
             documents: this.uploads.map((f, idx) => ({

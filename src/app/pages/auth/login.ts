@@ -10,6 +10,7 @@ import { MessageModule } from 'primeng/message';
 import { CommonModule } from '@angular/common';
 import { AppFloatingConfigurator } from '../../layout/component/app.floatingconfigurator';
 import { FirebaseService } from '../../services/firebase.service';
+import { UserService } from '../../services/user.service';
 
 @Component({
     selector: 'app-login',
@@ -97,6 +98,7 @@ export class Login {
 
     constructor(
         private firebaseService: FirebaseService,
+        private userService: UserService,
         private router: Router
     ) {}
 
@@ -114,9 +116,22 @@ export class Login {
             // Register new user
             this.firebaseService.register(this.email, this.password).subscribe({
                 next: (result) => {
-                    this.loading = false;
-                    this.successMessage = 'Account created successfully! Redirecting...';
-                    setTimeout(() => this.router.navigate(['/dashboard']), 1500);
+                    // Create user document in Firestore with default role 'customer'
+                    if (result.user) {
+                        this.userService.createUser(result.user, 'customer').subscribe({
+                            next: () => {
+                                this.loading = false;
+                                this.successMessage = 'Account created successfully! Redirecting...';
+                                setTimeout(() => this.router.navigate(['/dashboard']), 1500);
+                            },
+                            error: (err) => {
+                                console.error('Failed to create user document', err);
+                                this.loading = false;
+                                this.successMessage = 'Account created successfully! Redirecting...';
+                                setTimeout(() => this.router.navigate(['/dashboard']), 1500);
+                            }
+                        });
+                    }
                 },
                 error: (error) => {
                     this.loading = false;

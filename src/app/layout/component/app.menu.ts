@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MenuItem } from 'primeng/api';
 import { AppMenuitem } from './app.menuitem';
-import { FirebaseService } from '../../services/firebase.service';
+import { UserService } from '../../services/user.service';
 
 @Component({
     selector: 'app-menu',
@@ -22,10 +22,9 @@ import { FirebaseService } from '../../services/firebase.service';
 })
 export class AppMenu {
     model: MenuItem[] = [];
-    userRole: string = 'customer'; // Default role, will be updated from Firebase
 
     constructor(
-        private firebaseService: FirebaseService,
+        private userService: UserService,
         private cdr: ChangeDetectorRef
     ) {}
 
@@ -34,15 +33,9 @@ export class AppMenu {
         this.model = this.getGuestMenu();
         this.cdr.markForCheck();
 
-        // Listen to auth state and update menu based on role
-        this.firebaseService.getCurrentUser().subscribe((user) => {
-            if (user) {
-                // TODO: Get user role from Firestore users collection
-                // For now, using default 'customer' role
-                this.buildMenu(this.userRole);
-            } else {
-                this.buildMenu('guest');
-            }
+        // Listen to user role changes
+        this.userService.getUserRole().subscribe((role) => {
+            this.buildMenu(role);
         });
     }
 
