@@ -41,10 +41,22 @@ export class OrdersService {
         );
     }
 
+    // Convenience: fetch all orders and log them
+    getAllOrdersWithLog(): void {
+        this.getAllOrders().subscribe({
+            next: (orders) => {
+                console.log('[OrdersService] All orders:', orders);
+            },
+            error: (err) => {
+                console.error('[OrdersService] Failed to load all orders', err);
+            }
+        });
+    }
+
     // Get orders by user
     getUserOrders(userId: string): Observable<Order[]> {
         const ordersRef = collection(this.firestore, this.collectionName);
-        const q = query(ordersRef, where('userId', '==', userId), orderBy('createdAt', 'desc'));
+        const q = query(ordersRef, where('userId', '==', userId));
 
         return from(getDocs(q)).pipe(
             map((snapshot) =>

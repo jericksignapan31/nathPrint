@@ -12,6 +12,9 @@ import { DialogModule } from 'primeng/dialog';
 import { DividerModule } from 'primeng/divider';
 import { OrdersService } from '@/app/services/orders.service';
 import { Order, OrderStatus } from '@/app/models';
+import { UserService } from '@/app/services/user.service';
+import { filter, take } from 'rxjs';
+import { User } from '@/app/models/user.model';
 
 @Component({
     selector: 'app-orders-list',
@@ -179,6 +182,7 @@ import { Order, OrderStatus } from '@/app/models';
 })
 export class OrdersListComponent implements OnInit {
     ordersService = inject(OrdersService);
+    userService = inject(UserService);
     cdr = inject(ChangeDetectorRef);
     orders: Order[] = [];
     filteredOrders: Order[] = [];
@@ -191,17 +195,32 @@ export class OrdersListComponent implements OnInit {
     }
 
     loadOrders() {
-        this.ordersService.getAllOrders().subscribe({
-            next: (orders) => {
-                console.log('Orders loaded:', orders);
-                this.orders = orders;
-                this.filterOrders();
-                this.cdr.markForCheck();
-            },
-            error: (err) => {
-                console.error('Failed to load orders', err);
-            }
-        });
+        this.userService
+            .getCurrentUserData()
+            .pipe(
+                filter((u): u is User => !!u),
+                take(1)
+            )
+            .subscribe((user) => {
+                const source$ = user.role === 'admin' ? this.ordersService.getAllOrders() : this.ordersService.getUserOrders(user.uid);
+
+                source$.subscribe({
+                    next: (orders: Order[]) => {
+                        const filtered = user.role === 'admin' ? orders : orders.filter((o: Order) => o.userId === user.uid);
+                        if (user.role === 'admin') {
+                            console.log('[OrdersList] Admin orders:', filtered);
+                        } else {
+                            console.log('[OrdersList] Customer orders:', filtered);
+                        }
+                        this.orders = filtered;
+                        this.filterOrders();
+                        this.cdr.markForCheck();
+                    },
+                    error: (err) => {
+                        console.error('Failed to load orders', err);
+                    }
+                });
+            });
     }
 
     filterOrders() {
