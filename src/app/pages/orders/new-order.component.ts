@@ -1,19 +1,138 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { SelectModule } from 'primeng/select';
 
 @Component({
     selector: 'app-new-order',
     standalone: true,
-    imports: [CommonModule, RouterModule, CardModule, ButtonModule],
+    imports: [CommonModule, FormsModule, RouterModule, CardModule, ButtonModule, InputTextModule, InputNumberModule, SelectModule],
     template: `
         <div class="card">
-            <h2 class="text-3xl font-bold mb-3">Create New Order</h2>
-            <p class="text-muted-color mb-4">Under construction. Order form will be available soon.</p>
-            <p-button label="Back to Dashboard" icon="pi pi-home" [routerLink]="['/dashboard']"></p-button>
+            <p-card header="Upload document (PDF/DOC/DOCX)" styleClass="mb-4">
+                <div class="surface-border border-2 border-dashed border-round p-4 text-center" [ngClass]="{ 'border-primary border-3': isDragOver }" (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onFileDrop($event)">
+                    <p class="font-semibold mb-2">Drag & drop files here</p>
+                    <p class="text-sm text-muted-color mb-3">Accepts PDF, DOC, DOCX</p>
+                    <input #fileInput type="file" multiple accept=".pdf,.doc,.docx" class="hidden" (change)="onFileSelect($event)" />
+                    <p-button label="Choose Files" icon="pi pi-upload" (onClick)="fileInput.click()"></p-button>
+                </div>
+
+                <div class="mt-3" *ngIf="uploads.length > 0">
+                    <p class="text-sm text-muted-color mb-2">Selected files:</p>
+                    <ul class="m-0 pl-3 list-disc">
+                        <li *ngFor="let f of uploads" class="flex align-items-center gap-2 mb-1">
+                            <span class="font-medium">{{ f.name }}</span>
+                            <span class="text-sm text-muted-color">({{ formatSize(f.size) }})</span>
+                            <p-button icon="pi pi-times" text rounded severity="danger" (onClick)="removeFile(f.name)"></p-button>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+                    <div>
+                        <p-card header="Payments" styleClass="h-full">
+                            <div class="field mb-3">
+                                <label class="font-semibold block mb-2">Payment Method</label>
+                                <p-select [options]="paymentMethods" [(ngModel)]="paymentMethod" placeholder="Select method" optionLabel="label" optionValue="value" styleClass="w-full"></p-select>
+                            </div>
+                            <div class="field mb-3">
+                                <label class="font-semibold block mb-2">Reference No. (optional)</label>
+                                <input pInputText class="w-full" [(ngModel)]="paymentReference" placeholder="e.g., GCash ref or receipt ID" />
+                            </div>
+                            <div class="field mb-3">
+                                <label class="font-semibold block mb-2">Amount</label>
+                                <p-inputNumber class="w-full" [(ngModel)]="paymentAmount" mode="currency" currency="PHP" locale="en-PH"></p-inputNumber>
+                            </div>
+                        </p-card>
+                    </div>
+
+                    <div>
+                        <p-card header="Print Options" styleClass="h-full">
+                            <div class="field mb-3">
+                                <label class="font-semibold block mb-2">Paper Size</label>
+                                <p-select [options]="paperSizes" [(ngModel)]="paperSize" placeholder="Select size" styleClass="w-full"></p-select>
+                            </div>
+                            <div class="field mb-3">
+                                <label class="font-semibold block mb-2">Color Mode</label>
+                                <p-select [options]="colorModes" [(ngModel)]="colorMode" placeholder="Select mode" styleClass="w-full"></p-select>
+                            </div>
+                            <div class="field mb-3">
+                                <label class="font-semibold block mb-2">Copies</label>
+                                <p-inputNumber class="w-full" [(ngModel)]="copies" [min]="1" [max]="1000"></p-inputNumber>
+                            </div>
+                        </p-card>
+                    </div>
+                </div>
+            </p-card>
         </div>
     `
 })
-export class NewOrderComponent {}
+export class NewOrderComponent {
+    isDragOver = false;
+    uploads: { name: string; size: number; file: File }[] = [];
+
+    paymentMethods = [
+        { label: 'GCash', value: 'gcash' },
+        { label: 'Pay on Shop', value: 'pay_on_shop' }
+    ];
+    paymentMethod: string | null = null;
+    paymentReference = '';
+    paymentAmount: number | null = null;
+
+    paperSizes = ['A4', 'Letter', 'Legal', 'A3'];
+    colorModes = ['Black & White', 'Color'];
+    paperSize: string | null = null;
+    colorMode: string | null = null;
+    copies = 1;
+    onDragOver(event: DragEvent) {
+        event.preventDefault();
+        this.isDragOver = true;
+    }
+
+    onDragLeave(event: DragEvent) {
+        event.preventDefault();
+        this.isDragOver = false;
+    }
+
+    onFileDrop(event: DragEvent) {
+        event.preventDefault();
+        this.isDragOver = false;
+        if (!event.dataTransfer?.files) return;
+        this.addFiles(event.dataTransfer.files);
+    }
+
+    onFileSelect(event: Event) {
+        const input = event.target as HTMLInputElement;
+        if (!input.files) return;
+        this.addFiles(input.files);
+        input.value = '';
+    }
+
+    addFiles(fileList: FileList) {
+        const allowedExt = ['pdf', 'doc', 'docx'];
+        Array.from(fileList).forEach((file) => {
+            const ext = file.name.split('.').pop()?.toLowerCase();
+            if (!ext || !allowedExt.includes(ext)) {
+                return;
+            }
+            this.uploads.push({ name: file.name, size: file.size, file });
+        });
+    }
+
+    removeFile(name: string) {
+        this.uploads = this.uploads.filter((f) => f.name !== name);
+    }
+
+    formatSize(bytes: number): string {
+        if (bytes < 1024) return `${bytes} B`;
+        const kb = bytes / 1024;
+        if (kb < 1024) return `${kb.toFixed(1)} KB`;
+        const mb = kb / 1024;
+        return `${mb.toFixed(1)} MB`;
+    }
+}
