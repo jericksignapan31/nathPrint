@@ -14,6 +14,8 @@ import { AdminTodayOrdersComponent } from './orders/admin-today-orders.component
 import { AdminPaymentVerificationComponent } from './orders/admin-payment-verification.component';
 import { AdminVerifiedPaymentsComponent } from './orders/admin-verified-payments.component';
 import { AdminPaymentHistoryComponent } from './orders/admin-payment-history.component';
+import { AdminAllUsersComponent } from './users/admin-all-users.component';
+import { AdminCustomerListComponent } from './users/admin-customer-list.component';
 import { adminGuard } from '../guards/admin.guard';
 
 export default [
@@ -31,6 +33,8 @@ export default [
     { path: 'admin/payments/verify', component: AdminPaymentVerificationComponent, canActivate: [adminGuard] },
     { path: 'admin/payments/verified', component: AdminVerifiedPaymentsComponent, canActivate: [adminGuard] },
     { path: 'admin/payments/history', component: AdminPaymentHistoryComponent, canActivate: [adminGuard] },
+    { path: 'admin/users/all', component: AdminAllUsersComponent, canActivate: [adminGuard] },
+    { path: 'admin/users/customers', component: AdminCustomerListComponent, canActivate: [adminGuard] },
     { path: 'profile', component: ProfileComponent },
     { path: '**', redirectTo: '/notfound' }
 ] as Routes;

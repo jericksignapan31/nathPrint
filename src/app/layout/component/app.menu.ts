@@ -202,12 +202,12 @@ export class AppMenu {
                     {
                         label: 'All Users',
                         icon: 'pi pi-fw pi-users',
-                        routerLink: ['/admin/users/all']
+                        routerLink: ['/pages/admin/users/all']
                     },
                     {
                         label: 'Customer List',
                         icon: 'pi pi-fw pi-user',
-                        routerLink: ['/admin/users/customers']
+                        routerLink: ['/pages/admin/users/customers']
                     }
                 ]
             },
