@@ -1,10 +1,12 @@
 import { Component, inject } from '@angular/core';
 import { MenuItem } from 'primeng/api';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { StyleClassModule } from 'primeng/styleclass';
 import { AppConfigurator } from './app.configurator';
 import { LayoutService } from '@/app/layout/service/layout.service';
+import { FirebaseService } from '@/app/services/firebase.service';
+import { UserService } from '@/app/services/user.service';
 
 @Component({
     selector: 'app-topbar',
@@ -72,9 +74,9 @@ import { LayoutService } from '@/app/layout/service/layout.service';
                         <i class="pi pi-inbox"></i>
                         <span>Messages</span>
                     </button>
-                    <button type="button" class="layout-topbar-action">
-                        <i class="pi pi-user"></i>
-                        <span>Profile</span>
+                    <button type="button" class="layout-topbar-action" (click)="onLogout()">
+                        <i class="pi pi-sign-out"></i>
+                        <span>Logout</span>
                     </button>
                 </div>
             </div>
@@ -85,11 +87,44 @@ export class AppTopbar {
     items!: MenuItem[];
 
     layoutService = inject(LayoutService);
+    firebaseService = inject(FirebaseService);
+    userService = inject(UserService);
+    router = inject(Router);
+
+    currentUser$ = this.userService.getCurrentUserData();
+
+    ngOnInit() {
+        // Console log current user data
+        this.currentUser$.subscribe((user) => {
+            console.log('Current User:', user);
+            console.log('User Role:', user?.role);
+            console.log('User Email:', user?.email);
+            console.log('User Name:', user?.name);
+        });
+
+        // Console log Firebase Auth user
+        this.firebaseService.getCurrentUser().subscribe((authUser) => {
+            console.log('Firebase Auth User:', authUser);
+        });
+    }
 
     toggleDarkMode() {
         this.layoutService.layoutConfig.update((state) => ({
             ...state,
             darkTheme: !state.darkTheme
         }));
+    }
+
+    onLogout() {
+        if (confirm('Are you sure you want to logout?')) {
+            this.firebaseService.logout().subscribe({
+                next: () => {
+                    this.router.navigate(['/auth/login']);
+                },
+                error: (err) => {
+                    console.error('Logout failed', err);
+                }
+            });
+        }
     }
 }
