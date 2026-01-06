@@ -6,6 +6,7 @@ import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { TextareaModule } from 'primeng/textarea';
 import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
 import { SelectButtonModule } from 'primeng/selectbutton';
@@ -13,7 +14,7 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 @Component({
     selector: 'app-new-order',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterModule, CardModule, ButtonModule, InputTextModule, InputNumberModule, SelectModule, DatePickerModule, SelectButtonModule],
+    imports: [CommonModule, FormsModule, RouterModule, CardModule, ButtonModule, InputTextModule, InputNumberModule, TextareaModule, SelectModule, DatePickerModule, SelectButtonModule],
     styles: [
         `
             ::ng-deep .p-selectbutton .p-button {
@@ -58,11 +59,19 @@ import { SelectButtonModule } from 'primeng/selectbutton';
                             </div>
                             <div class="field mb-3">
                                 <label class="font-semibold block mb-2">Color Mode</label>
-                                <p-select [options]="colorModes" [(ngModel)]="colorMode" placeholder="Select mode" styleClass="w-full"></p-select>
+                                <p-selectbutton [options]="colorModes" [(ngModel)]="colorMode" optionLabel="label" optionValue="value" styleClass="w-full" style="gap: 0.5rem; display: flex;"></p-selectbutton>
+                            </div>
+                            <div class="field mb-3">
+                                <label class="font-semibold block mb-2">Paper Type</label>
+                                <p-selectbutton [options]="paperTypes" [(ngModel)]="paperType" optionLabel="label" optionValue="value" styleClass="w-full" style="gap: 0.5rem; display: flex;"></p-selectbutton>
                             </div>
                             <div class="field mb-3">
                                 <label class="font-semibold block mb-2">Copies</label>
                                 <p-inputNumber class="w-full" [(ngModel)]="copies" [min]="1" [max]="1000"></p-inputNumber>
+                            </div>
+                            <div class="field mb-3">
+                                <label class="font-semibold block mb-2">Note</label>
+                                <textarea pInputTextarea [(ngModel)]="note" rows="4" class="w-full" placeholder="Add any special instructions or notes..."></textarea>
                             </div>
                         </p-card>
                     </div>
@@ -106,10 +115,20 @@ export class NewOrderComponent {
         { label: 'Legal', value: 'Legal' },
         { label: 'A3', value: 'A3' }
     ];
-    colorModes = ['Black & White', 'Color'];
+    colorModes = [
+        { label: 'Black & White', value: 'bw' },
+        { label: 'Color', value: 'color' }
+    ];
+    paperTypes = [
+        { label: 'Bond', value: 'bond' },
+        { label: 'Glossy', value: 'glossy' },
+        { label: 'Matte', value: 'matte' }
+    ];
     paperSize: string | null = null;
     colorMode: string | null = null;
+    paperType: string | null = null;
     copies = 1;
+    note = '';
     pickupDateTime: Date | null = null;
     onDragOver(event: DragEvent) {
         event.preventDefault();
