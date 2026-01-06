@@ -6,11 +6,13 @@ import { Landing } from './app/pages/landing/landing';
 import { Notfound } from './app/pages/notfound/notfound';
 
 export const appRoutes: Routes = [
+    { path: '', redirectTo: 'landing', pathMatch: 'full' },
     {
         path: '',
         component: AppLayout,
         children: [
-            { path: '', component: Dashboard },
+            { path: 'dashboard', component: Dashboard },
+            { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
             { path: 'uikit', loadChildren: () => import('./app/pages/uikit/uikit.routes') },
             { path: 'documentation', component: Documentation },
             { path: 'pages', loadChildren: () => import('./app/pages/pages.routes') }
