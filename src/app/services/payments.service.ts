@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Firestore, collection, addDoc, getDocs, getDoc, doc, updateDoc, query, where, Timestamp } from '@angular/fire/firestore';
 import { Observable, from, map } from 'rxjs';
-import { Payment, PaymentStatusType } from '../models';
+import { Payment } from '../models';
+import { PaymentStatusType } from '../models/payment.model';
 
 @Injectable({
     providedIn: 'root'
@@ -30,14 +31,14 @@ export class PaymentsService {
         return from(getDocs(q)).pipe(
             map((snapshot) => {
                 if (!snapshot.empty) {
-                    const doc = snapshot.docs[0];
+                    const docData = snapshot.docs[0].data();
                     return {
-                        paymentId: doc.id,
-                        ...doc.data(),
-                        createdAt: doc.data()['createdAt']?.toDate(),
-                        paymentDate: doc.data()['paymentDate']?.toDate(),
-                        updatedAt: doc.data()['updatedAt']?.toDate()
-                    } as Payment;
+                        paymentId: snapshot.docs[0].id,
+                        ...docData,
+                        createdAt: docData['createdAt']?.toDate(),
+                        paymentDate: docData['paymentDate']?.toDate(),
+                        updatedAt: docData['updatedAt']?.toDate()
+                    } as unknown as Payment;
                 }
                 return null;
             })
@@ -51,16 +52,16 @@ export class PaymentsService {
 
         return from(getDocs(q)).pipe(
             map((snapshot) =>
-                snapshot.docs.map(
-                    (doc) =>
-                        ({
-                            paymentId: doc.id,
-                            ...doc.data(),
-                            createdAt: doc.data()['createdAt']?.toDate(),
-                            paymentDate: doc.data()['paymentDate']?.toDate(),
-                            updatedAt: doc.data()['updatedAt']?.toDate()
-                        }) as Payment
-                )
+                snapshot.docs.map((doc) => {
+                    const docData = doc.data();
+                    return {
+                        paymentId: doc.id,
+                        ...docData,
+                        createdAt: docData['createdAt']?.toDate(),
+                        paymentDate: docData['paymentDate']?.toDate(),
+                        updatedAt: docData['updatedAt']?.toDate()
+                    } as unknown as Payment;
+                })
             )
         );
     }
@@ -80,7 +81,7 @@ export class PaymentsService {
                             createdAt: doc.data()['createdAt']?.toDate(),
                             paymentDate: doc.data()['paymentDate']?.toDate(),
                             updatedAt: doc.data()['updatedAt']?.toDate()
-                        }) as Payment
+                        }) as unknown as Payment
                 )
             )
         );

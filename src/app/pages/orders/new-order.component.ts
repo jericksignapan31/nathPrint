@@ -27,6 +27,24 @@ import { SelectButtonModule } from 'primeng/selectbutton';
     ],
     template: `
         <div class="card">
+            <div *ngIf="isSubmitting" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; display: flex; align-items: center; justify-content: center;">
+                <div style="text-align: center; background: white; padding: 2rem; border-radius: 1rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 150" style="width: 200px; height: 100px; margin-bottom: 1rem;">
+                        <path
+                            fill="none"
+                            stroke="#FF156D"
+                            stroke-width="15"
+                            stroke-linecap="round"
+                            stroke-dasharray="300 385"
+                            stroke-dashoffset="0"
+                            d="M275 75c0 31-27 50-50 50-58 0-92-100-150-100-28 0-50 22-50 50s23 50 50 50c58 0 92-100 150-100 24 0 50 19 50 50Z"
+                        >
+                            <animate attributeName="stroke-dashoffset" calcMode="spline" dur="2" values="685;-685" keySplines="0 0 1 1" repeatCount="indefinite"></animate>
+                        </path>
+                    </svg>
+                    <p style="margin-top: 1rem; font-size: 1.2rem; font-weight: 600; color: #333;">Submitting your order...</p>
+                </div>
+            </div>
             <p-card header="Upload document (PDF/DOC/DOCX)" styleClass="mb-4">
                 <div class="surface-border border-2 border-dashed border-round p-4 text-center" [ngClass]="{ 'border-primary border-3': isDragOver }" (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onFileDrop($event)">
                     <p class="font-semibold mb-2">Drag & drop files here</p>
@@ -78,7 +96,7 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 
                     <div>
                         <p-card header="Payments" [ngStyle]="{ height: '100%', padding: '1.5rem' }">
-                            <div class="bg-surface-50 border-round p-4 mb-4 border-1 border-primary-200">
+                            <div class="bg-surface-50 border-round p-4 mb-4 border border-primary-200">
                                 <div class="text-center mb-3">
                                     <p class="text-primary font-semibold text-lg mb-3">Estimated Total</p>
                                     <div class="bg-white border-2 border-primary border-round p-3 mb-3">
@@ -138,6 +156,7 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 })
 export class NewOrderComponent {
     isDragOver = false;
+    isSubmitting = false;
     uploads: { name: string; size: number; file: File }[] = [];
 
     paymentMethods = [
@@ -230,6 +249,8 @@ export class NewOrderComponent {
     }
 
     onSubmit() {
+        this.isSubmitting = true;
+
         // TODO: Implement order submission logic
         console.log('Submitting order...', {
             uploads: this.uploads,
@@ -244,6 +265,12 @@ export class NewOrderComponent {
             paymentAmount: this.paymentAmount,
             receiptFile: this.receiptFile
         });
+
+        // Simulate API call - remove this after implementing real submission
+        setTimeout(() => {
+            this.isSubmitting = false;
+            alert('Order submitted successfully!');
+        }, 2000);
     }
 
     onCancel() {
