@@ -12,7 +12,7 @@ import { AppFloatingConfigurator } from '../../layout/component/app.floatingconf
 import { FirebaseService } from '../../services/firebase.service';
 
 @Component({
-    selector: 'app-login',
+    selector: 'app-signup',
     standalone: true,
     imports: [CommonModule, ButtonModule, CheckboxModule, InputTextModule, PasswordModule, FormsModule, RouterModule, RippleModule, AppFloatingConfigurator, MessageModule],
     template: `
@@ -39,8 +39,8 @@ import { FirebaseService } from '../../services/firebase.service';
                                     />
                                 </g>
                             </svg>
-                            <div class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4">Welcome to NathyPrint!</div>
-                            <span class="text-muted-color font-medium">Sign in to continue</span>
+                            <div class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4">Create Account</div>
+                            <span class="text-muted-color font-medium">Join NathyPrint today</span>
                         </div>
 
                         @if (errorMessage) {
@@ -51,23 +51,28 @@ import { FirebaseService } from '../../services/firebase.service';
                         }
 
                         <div>
-                            <label for="email1" class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Email</label>
-                            <input pInputText id="email1" type="text" placeholder="Email address" class="w-full md:w-120 mb-8" [(ngModel)]="email" />
+                            <label for="fullname" class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Full Name</label>
+                            <input pInputText id="fullname" type="text" placeholder="Enter your full name" class="w-full md:w-120 mb-4" [(ngModel)]="fullName" />
 
-                            <label for="password1" class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2">Password</label>
-                            <p-password id="password1" [(ngModel)]="password" placeholder="Password" [toggleMask]="true" styleClass="mb-4" [fluid]="true" [feedback]="false"></p-password>
+                            <label for="email" class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Email</label>
+                            <input pInputText id="email" type="email" placeholder="Email address" class="w-full md:w-120 mb-4" [(ngModel)]="email" />
 
-                            <div class="flex items-center justify-between mt-2 mb-8 gap-8">
-                                <div class="flex items-center">
-                                    <p-checkbox [(ngModel)]="checked" id="rememberme1" binary class="mr-2"></p-checkbox>
-                                    <label for="rememberme1">Remember me</label>
-                                </div>
-                                <span class="font-medium no-underline ml-2 text-right cursor-pointer text-primary">Forgot password?</span>
+                            <label for="password" class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2">Password</label>
+                            <p-password id="password" [(ngModel)]="password" placeholder="Password" [toggleMask]="true" styleClass="mb-4" [fluid]="true" [feedback]="true"></p-password>
+
+                            <label for="confirmPassword" class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2">Confirm Password</label>
+                            <p-password id="confirmPassword" [(ngModel)]="confirmPassword" placeholder="Confirm Password" [toggleMask]="true" styleClass="mb-4" [fluid]="true" [feedback]="false"></p-password>
+
+                            <div class="flex items-center mb-8">
+                                <p-checkbox [(ngModel)]="acceptTerms" id="terms" binary class="mr-2"></p-checkbox>
+                                <label for="terms">I agree to the <span class="text-primary cursor-pointer">Terms and Conditions</span></label>
                             </div>
-                            <p-button label="Sign In" styleClass="w-full" (onClick)="onLogin()" [loading]="loading"></p-button>
-                            <div class="text-center mt-4">
-                                <span class="text-muted-color">Don't have an account? </span>
-                                <span class="font-medium cursor-pointer text-primary" routerLink="/auth/signup">Sign Up</span>
+
+                            <p-button label="Create Account" styleClass="w-full mb-4" (onClick)="onSignup()" [loading]="loading"></p-button>
+
+                            <div class="text-center">
+                                <span class="text-muted-color">Already have an account? </span>
+                                <span class="font-medium cursor-pointer text-primary" routerLink="/auth/login">Sign In</span>
                             </div>
                         </div>
                     </div>
@@ -76,23 +81,40 @@ import { FirebaseService } from '../../services/firebase.service';
         </div>
     `
 })
-export class Login {
+export class Signup {
+    fullName: string = '';
     email: string = '';
     password: string = '';
-    checked: boolean = false;
+    confirmPassword: string = '';
+    acceptTerms: boolean = false;
     loading: boolean = false;
     errorMessage: string = '';
     successMessage: string = '';
-    isRegisterMode: boolean = false;
 
     constructor(
         private firebaseService: FirebaseService,
         private router: Router
     ) {}
 
-    onLogin() {
-        if (!this.email || !this.password) {
-            this.errorMessage = 'Please enter email and password';
+    onSignup() {
+        // Validation
+        if (!this.fullName || !this.email || !this.password || !this.confirmPassword) {
+            this.errorMessage = 'Please fill in all fields';
+            return;
+        }
+
+        if (!this.acceptTerms) {
+            this.errorMessage = 'Please accept the Terms and Conditions';
+            return;
+        }
+
+        if (this.password !== this.confirmPassword) {
+            this.errorMessage = 'Passwords do not match';
+            return;
+        }
+
+        if (this.password.length < 6) {
+            this.errorMessage = 'Password should be at least 6 characters';
             return;
         }
 
@@ -100,59 +122,35 @@ export class Login {
         this.errorMessage = '';
         this.successMessage = '';
 
-        if (this.isRegisterMode) {
-            // Register new user
-            this.firebaseService.register(this.email, this.password).subscribe({
-                next: (result) => {
-                    this.loading = false;
-                    this.successMessage = 'Account created successfully! Redirecting...';
-                    setTimeout(() => this.router.navigate(['/dashboard']), 1500);
-                },
-                error: (error) => {
-                    this.loading = false;
-                    this.errorMessage = this.getErrorMessage(error.code);
-                }
-            });
-        } else {
-            // Login existing user
-            this.firebaseService.login(this.email, this.password).subscribe({
-                next: (result) => {
-                    this.loading = false;
-                    this.successMessage = 'Login successful! Redirecting...';
-                    setTimeout(() => this.router.navigate(['/dashboard']), 1000);
-                },
-                error: (error) => {
-                    this.loading = false;
-                    this.errorMessage = this.getErrorMessage(error.code);
-                }
-            });
-        }
-    }
+        // Register user
+        this.firebaseService.register(this.email, this.password).subscribe({
+            next: (result) => {
+                this.loading = false;
+                this.successMessage = 'Account created successfully! Redirecting to dashboard...';
 
-    toggleMode() {
-        this.isRegisterMode = !this.isRegisterMode;
-        this.errorMessage = '';
-        this.successMessage = '';
+                // Store user profile data (optional - you can add this to Firestore later)
+                // For now, just redirect
+                setTimeout(() => this.router.navigate(['/dashboard']), 2000);
+            },
+            error: (error) => {
+                this.loading = false;
+                this.errorMessage = this.getErrorMessage(error.code);
+            }
+        });
     }
 
     getErrorMessage(code: string): string {
         switch (code) {
             case 'auth/invalid-email':
                 return 'Invalid email address';
-            case 'auth/user-disabled':
-                return 'This account has been disabled';
-            case 'auth/user-not-found':
-                return 'No account found with this email';
-            case 'auth/wrong-password':
-                return 'Incorrect password';
             case 'auth/email-already-in-use':
-                return 'Email already registered';
+                return 'Email already registered. Please sign in instead.';
             case 'auth/weak-password':
-                return 'Password should be at least 6 characters';
-            case 'auth/invalid-credential':
-                return 'Invalid email or password';
+                return 'Password is too weak. Use at least 6 characters.';
+            case 'auth/operation-not-allowed':
+                return 'Email/password sign up is not enabled';
             default:
-                return 'Login failed. Please try again.';
+                return 'Registration failed. Please try again.';
         }
     }
 }
