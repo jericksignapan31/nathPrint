@@ -143,7 +143,7 @@ export class AppMenu {
                     {
                         label: "Today's Orders",
                         icon: 'pi pi-fw pi-calendar-clock',
-                        routerLink: ['/dashboard/today']
+                        routerLink: ['/pages/admin/dashboard/today']
                     }
                 ]
             },
@@ -154,22 +154,22 @@ export class AppMenu {
                     {
                         label: 'All Orders',
                         icon: 'pi pi-fw pi-list',
-                        routerLink: ['/admin/orders/all']
+                        routerLink: ['/pages/admin/orders/all']
                     },
                     {
                         label: 'Pending Orders',
                         icon: 'pi pi-fw pi-clock',
-                        routerLink: ['/admin/orders/pending']
+                        routerLink: ['/pages/admin/orders/pending']
                     },
                     {
                         label: 'In Progress',
                         icon: 'pi pi-fw pi-spin pi-spinner',
-                        routerLink: ['/admin/orders/progress']
+                        routerLink: ['/pages/admin/orders/progress']
                     },
                     {
                         label: 'Completed',
                         icon: 'pi pi-fw pi-check-circle',
-                        routerLink: ['/admin/orders/completed']
+                        routerLink: ['/pages/admin/orders/completed']
                     }
                 ]
             },

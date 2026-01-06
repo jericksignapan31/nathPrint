@@ -6,6 +6,12 @@ import { NewOrderComponent } from './orders/new-order.component';
 import { OrdersListComponent } from './orders/orders-list.component';
 import { OrderDetailComponent } from './orders/order-detail.component';
 import { ProfileComponent } from './profile/profile.component';
+import { AdminOrdersComponent } from './orders/admin-orders.component';
+import { AdminPendingOrdersComponent } from './orders/admin-pending-orders.component';
+import { AdminInProgressOrdersComponent } from './orders/admin-in-progress-orders.component';
+import { AdminCompletedOrdersComponent } from './orders/admin-completed-orders.component';
+import { AdminTodayOrdersComponent } from './orders/admin-today-orders.component';
+import { adminGuard } from '../guards/admin.guard';
 
 export default [
     { path: 'documentation', component: Documentation },
@@ -14,6 +20,11 @@ export default [
     { path: 'orders', component: OrdersListComponent },
     { path: 'orders/new', component: NewOrderComponent },
     { path: 'orders/:id', component: OrderDetailComponent },
+    { path: 'admin/dashboard/today', component: AdminTodayOrdersComponent, canActivate: [adminGuard] },
+    { path: 'admin/orders/all', component: AdminOrdersComponent, canActivate: [adminGuard] },
+    { path: 'admin/orders/pending', component: AdminPendingOrdersComponent, canActivate: [adminGuard] },
+    { path: 'admin/orders/progress', component: AdminInProgressOrdersComponent, canActivate: [adminGuard] },
+    { path: 'admin/orders/completed', component: AdminCompletedOrdersComponent, canActivate: [adminGuard] },
     { path: 'profile', component: ProfileComponent },
     { path: '**', redirectTo: '/notfound' }
 ] as Routes;

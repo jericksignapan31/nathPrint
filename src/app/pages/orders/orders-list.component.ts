@@ -49,7 +49,7 @@ import { User } from '@/app/models/user.model';
                             </td>
                             <td class="font-semibold">₱{{ order.totalAmount | number: '1.2-2' }}</td>
                             <td>
-                                <p-tag [value]="order.status" [severity]="getStatusSeverity(order.status)"></p-tag>
+                                <p-tag [value]="displayStatus(order.status)" [severity]="getStatusSeverity(order.status)"></p-tag>
                             </td>
                             <td>
                                 <p-button icon="pi pi-eye" [rounded]="true" [text]="true" (click)="viewOrder(order)" pTooltip="View Details" tooltipPosition="top"></p-button>
@@ -73,7 +73,7 @@ import { User } from '@/app/models/user.model';
                 <!-- Status -->
                 <div>
                     <label class="font-semibold text-gray-600">Status</label>
-                    <p-tag [value]="selectedOrder.status | uppercase" [severity]="getStatusSeverity(selectedOrder.status)" class="mt-2"></p-tag>
+                    <p-tag [value]="displayStatus(selectedOrder.status) | uppercase" [severity]="getStatusSeverity(selectedOrder.status)" class="mt-2"></p-tag>
                 </div>
 
                 <p-divider></p-divider>
@@ -237,6 +237,10 @@ export class OrdersListComponent implements OnInit {
         this.selectedOrder = order;
         this.showModal = true;
         this.cdr.markForCheck();
+    }
+
+    displayStatus(status: OrderStatus): string {
+        return status === 'completed' ? 'Ready to Pick Up' : status;
     }
 
     formatColorMode(mode: string): string {
