@@ -61,10 +61,15 @@ export class AppMenu {
                     //     ]
                     // },
                     {
+                        label: 'New Order',
+                        icon: 'pi pi-fw pi-plus-circle',
+                        routerLink: ['/pages/orders/new']
+                    },
+                    {
                         label: 'Crud',
                         icon: 'pi pi-fw pi-pencil',
                         routerLink: ['/pages/crud']
-                    },
+                    }
                     // {
                     //     label: 'Not Found',
                     //     icon: 'pi pi-fw pi-exclamation-circle',
@@ -76,7 +81,7 @@ export class AppMenu {
                     //     routerLink: ['/pages/empty']
                     // }
                 ]
-            },
+            }
             // {
             //     label: 'Hierarchy',
             //     path: '/hierarchy',

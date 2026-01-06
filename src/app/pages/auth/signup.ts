@@ -125,15 +125,35 @@ export class Signup {
         // Register user
         this.firebaseService.register(this.email, this.password).subscribe({
             next: (result) => {
+                console.log('Registration successful:', result);
                 this.loading = false;
                 this.successMessage = 'Account created successfully! Redirecting to dashboard...';
 
-                // Store user profile data (optional - you can add this to Firestore later)
-                // For now, just redirect
-                setTimeout(() => this.router.navigate(['/dashboard']), 2000);
+                // Create user profile in Firestore
+                const userData = {
+                    uid: result.user.uid,
+                    email: this.email,
+                    displayName: this.fullName,
+                    role: 'customer',
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                };
+
+                this.firebaseService.addDocument('users', userData).subscribe({
+                    next: () => {
+                        console.log('User profile created');
+                        setTimeout(() => this.router.navigate(['/dashboard']), 2000);
+                    },
+                    error: (err) => {
+                        console.error('Error creating profile:', err);
+                        // Still redirect even if profile creation fails
+                        setTimeout(() => this.router.navigate(['/dashboard']), 2000);
+                    }
+                });
             },
             error: (error) => {
                 this.loading = false;
+                console.error('Registration error:', error);
                 this.errorMessage = this.getErrorMessage(error.code);
             }
         });
