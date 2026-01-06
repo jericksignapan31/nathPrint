@@ -78,6 +78,24 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 
                     <div>
                         <p-card header="Payments" [ngStyle]="{ height: '100%', padding: '1.5rem' }">
+                            <div class="bg-surface-50 border-round p-4 mb-4 border-1 border-primary-200">
+                                <div class="text-center mb-3">
+                                    <p class="text-primary font-semibold text-lg mb-3">Estimated Total</p>
+                                    <div class="bg-white border-2 border-primary border-round p-3 mb-3">
+                                        <p class="text-5xl font-bold text-primary m-0">{{ paymentAmount || 0 | currency: 'PHP' : 'symbol' : '1.2-2' }}</p>
+                                    </div>
+                                </div>
+                                <div class="text-sm text-muted-color">
+                                    <p class="flex align-items-center gap-2 mb-2 m-0">
+                                        <i class="pi pi-info-circle text-blue-500"></i>
+                                        <span>If the total amount is zero, prices have not yet been set by the printshop.</span>
+                                    </p>
+                                    <p class="flex align-items-center gap-2 m-0">
+                                        <i class="pi pi-exclamation-circle text-red-500"></i>
+                                        <span><strong>This is an estimate.</strong> Final cost will be confirmed at the shop.</span>
+                                    </p>
+                                </div>
+                            </div>
                             <div class="field mb-3">
                                 <label class="font-semibold block mb-2">Payment Method</label>
                                 <p-selectbutton [options]="paymentMethods" [(ngModel)]="paymentMethod" optionLabel="label" optionValue="value" styleClass="w-full" style="gap: 0.5rem; display: flex;"></p-selectbutton>
@@ -108,6 +126,11 @@ import { SelectButtonModule } from 'primeng/selectbutton';
                             </div>
                         </p-card>
                     </div>
+                </div>
+
+                <div style="margin-top: 2rem; display: flex; gap: 0.5rem; justify-content: space-between;">
+                    <p-button label="Cancel" severity="secondary" icon="pi pi-times" (onClick)="onCancel()"></p-button>
+                    <p-button label="Submit Order" severity="success" icon="pi pi-check" (onClick)="onSubmit()"></p-button>
                 </div>
             </p-card>
         </div>
@@ -204,5 +227,30 @@ export class NewOrderComponent {
             this.receiptFile = file;
         }
         input.value = '';
+    }
+
+    onSubmit() {
+        // TODO: Implement order submission logic
+        console.log('Submitting order...', {
+            uploads: this.uploads,
+            pickupDateTime: this.pickupDateTime,
+            paperSize: this.paperSize,
+            colorMode: this.colorMode,
+            paperType: this.paperType,
+            copies: this.copies,
+            note: this.note,
+            paymentMethod: this.paymentMethod,
+            paymentReference: this.paymentReference,
+            paymentAmount: this.paymentAmount,
+            receiptFile: this.receiptFile
+        });
+    }
+
+    onCancel() {
+        // TODO: Implement cancel logic with confirmation
+        if (confirm('Are you sure you want to cancel? All changes will be lost.')) {
+            // Reset form or navigate back
+            console.log('Order cancelled');
+        }
     }
 }
