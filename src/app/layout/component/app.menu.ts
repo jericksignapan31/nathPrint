@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MenuItem } from 'primeng/api';
@@ -9,8 +9,9 @@ import { FirebaseService } from '../../services/firebase.service';
     selector: 'app-menu',
     standalone: true,
     imports: [CommonModule, AppMenuitem, RouterModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
     template: `<ul class="layout-menu">
-        @for (item of model; track item.label) {
+        @for (item of model; track $index) {
             @if (!item.separator) {
                 <li app-menuitem [item]="item" [root]="true"></li>
             } @else {
@@ -23,11 +24,15 @@ export class AppMenu {
     model: MenuItem[] = [];
     userRole: string = 'customer'; // Default role, will be updated from Firebase
 
-    constructor(private firebaseService: FirebaseService) {}
+    constructor(
+        private firebaseService: FirebaseService,
+        private cdr: ChangeDetectorRef
+    ) {}
 
     ngOnInit() {
-        // show guest menu immediately before auth state resolves
-        this.buildMenu('guest');
+        // Show guest menu immediately
+        this.model = this.getGuestMenu();
+        this.cdr.markForCheck();
 
         // Listen to auth state and update menu based on role
         this.firebaseService.getCurrentUser().subscribe((user) => {
@@ -49,6 +54,7 @@ export class AppMenu {
         } else {
             this.model = this.getGuestMenu();
         }
+        this.cdr.markForCheck();
     }
 
     getCustomerMenu(): MenuItem[] {
@@ -75,7 +81,7 @@ export class AppMenu {
                     {
                         label: 'My Orders',
                         icon: 'pi pi-fw pi-list',
-                        routerLink: ['/pages/orders/list']
+                        routerLink: ['/pages/orders']
                     },
                     {
                         label: 'Order History',

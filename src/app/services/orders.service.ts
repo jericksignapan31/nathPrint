@@ -28,15 +28,15 @@ export class OrdersService {
         const ordersRef = collection(this.firestore, this.collectionName);
         return from(getDocs(ordersRef)).pipe(
             map((snapshot) =>
-                snapshot.docs.map(
-                    (doc) =>
-                        ({
-                            orderId: doc.id,
-                            ...doc.data(),
-                            createdAt: doc.data()['createdAt']?.toDate(),
-                            updatedAt: doc.data()['updatedAt']?.toDate()
-                        }) as Order
-                )
+                snapshot.docs.map((doc) => {
+                    const data = doc.data();
+                    return {
+                        orderId: doc.id,
+                        ...data,
+                        createdAt: data['createdAt']?.toDate ? data['createdAt'].toDate() : new Date(data['createdAt']),
+                        updatedAt: data['updatedAt']?.toDate ? data['updatedAt'].toDate() : new Date(data['updatedAt'])
+                    } as Order;
+                })
             )
         );
     }

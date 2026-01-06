@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { Auth, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, onAuthStateChanged, User, GoogleAuthProvider, signInWithPopup } from '@angular/fire/auth';
 import { Firestore, collection, addDoc, getDocs, query, where, updateDoc, deleteDoc, doc, QuerySnapshot, DocumentData } from '@angular/fire/firestore';
 import { Observable, from, BehaviorSubject } from 'rxjs';
@@ -11,11 +11,16 @@ export class FirebaseService {
 
     constructor(
         private auth: Auth,
-        private firestore: Firestore
+        private firestore: Firestore,
+        private ngZone: NgZone
     ) {
         // Track auth state
-        onAuthStateChanged(this.auth, (user) => {
-            this.currentUser$.next(user);
+        this.ngZone.runOutsideAngular(() => {
+            onAuthStateChanged(this.auth, (user) => {
+                this.ngZone.run(() => {
+                    this.currentUser$.next(user);
+                });
+            });
         });
     }
 
