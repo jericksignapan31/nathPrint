@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Auth, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, onAuthStateChanged, User } from '@angular/fire/auth';
+import { Auth, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, onAuthStateChanged, User, GoogleAuthProvider, signInWithPopup } from '@angular/fire/auth';
 import { Firestore, collection, addDoc, getDocs, query, where, updateDoc, deleteDoc, doc, QuerySnapshot, DocumentData } from '@angular/fire/firestore';
 import { Observable, from, BehaviorSubject } from 'rxjs';
 
@@ -27,6 +27,11 @@ export class FirebaseService {
 
     login(email: string, password: string) {
         return from(signInWithEmailAndPassword(this.auth, email, password));
+    }
+
+    loginWithGoogle() {
+        const provider = new GoogleAuthProvider();
+        return from(signInWithPopup(this.auth, provider));
     }
 
     logout() {

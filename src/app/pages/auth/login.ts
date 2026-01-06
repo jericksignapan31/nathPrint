@@ -64,7 +64,16 @@ import { FirebaseService } from '../../services/firebase.service';
                                 </div>
                                 <span class="font-medium no-underline ml-2 text-right cursor-pointer text-primary">Forgot password?</span>
                             </div>
-                            <p-button label="Sign In" styleClass="w-full" (onClick)="onLogin()" [loading]="loading"></p-button>
+                            <p-button label="Sign In" styleClass="w-full mb-4" (onClick)="onLogin()" [loading]="loading"></p-button>
+
+                            <div class="flex items-center mb-4">
+                                <div class="flex-1 border-t border-surface-200 dark:border-surface-700"></div>
+                                <span class="px-4 text-muted-color text-sm">OR</span>
+                                <div class="flex-1 border-t border-surface-200 dark:border-surface-700"></div>
+                            </div>
+
+                            <p-button label="Continue with Google" icon="pi pi-google" styleClass="w-full p-button-outlined" (onClick)="onGoogleLogin()" [loading]="loadingGoogle"> </p-button>
+
                             <div class="text-center mt-4">
                                 <span class="text-muted-color">Don't have an account? </span>
                                 <span class="font-medium cursor-pointer text-primary" routerLink="/auth/signup">Sign Up</span>
@@ -81,6 +90,7 @@ export class Login {
     password: string = '';
     checked: boolean = false;
     loading: boolean = false;
+    loadingGoogle: boolean = false;
     errorMessage: string = '';
     successMessage: string = '';
     isRegisterMode: boolean = false;
@@ -127,6 +137,30 @@ export class Login {
                 }
             });
         }
+    }
+
+    onGoogleLogin() {
+        this.loadingGoogle = true;
+        this.errorMessage = '';
+        this.successMessage = '';
+
+        this.firebaseService.loginWithGoogle().subscribe({
+            next: (result) => {
+                this.loadingGoogle = false;
+                this.successMessage = 'Login successful! Redirecting...';
+                setTimeout(() => this.router.navigate(['/dashboard']), 1000);
+            },
+            error: (error) => {
+                this.loadingGoogle = false;
+                if (error.code === 'auth/popup-closed-by-user') {
+                    this.errorMessage = 'Login cancelled';
+                } else if (error.code === 'auth/popup-blocked') {
+                    this.errorMessage = 'Please allow popups for this site';
+                } else {
+                    this.errorMessage = 'Google login failed. Please try again.';
+                }
+            }
+        });
     }
 
     toggleMode() {
