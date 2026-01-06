@@ -1,17 +1,20 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { CheckboxModule } from 'primeng/checkbox';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { RippleModule } from 'primeng/ripple';
+import { MessageModule } from 'primeng/message';
+import { CommonModule } from '@angular/common';
 import { AppFloatingConfigurator } from '../../layout/component/app.floatingconfigurator';
+import { FirebaseService } from '../../services/firebase.service';
 
 @Component({
     selector: 'app-login',
     standalone: true,
-    imports: [ButtonModule, CheckboxModule, InputTextModule, PasswordModule, FormsModule, RouterModule, RippleModule, AppFloatingConfigurator],
+    imports: [CommonModule, ButtonModule, CheckboxModule, InputTextModule, PasswordModule, FormsModule, RouterModule, RippleModule, AppFloatingConfigurator, MessageModule],
     template: `
         <app-floating-configurator />
         <div class="bg-surface-50 dark:bg-surface-950 flex items-center justify-center min-h-screen min-w-screen overflow-hidden">
@@ -36,9 +39,16 @@ import { AppFloatingConfigurator } from '../../layout/component/app.floatingconf
                                     />
                                 </g>
                             </svg>
-                            <div class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4">Welcome to PrimeLand!</div>
+                            <div class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4">Welcome to NathyPrint!</div>
                             <span class="text-muted-color font-medium">Sign in to continue</span>
                         </div>
+
+                        @if (errorMessage) {
+                            <p-message severity="error" [text]="errorMessage" styleClass="mb-4 w-full"></p-message>
+                        }
+                        @if (successMessage) {
+                            <p-message severity="success" [text]="successMessage" styleClass="mb-4 w-full"></p-message>
+                        }
 
                         <div>
                             <label for="email1" class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Email</label>
@@ -54,7 +64,11 @@ import { AppFloatingConfigurator } from '../../layout/component/app.floatingconf
                                 </div>
                                 <span class="font-medium no-underline ml-2 text-right cursor-pointer text-primary">Forgot password?</span>
                             </div>
-                            <p-button label="Sign In" styleClass="w-full" routerLink="/dashboard"></p-button>
+                            <p-button label="Sign In" styleClass="w-full" (onClick)="onLogin()" [loading]="loading"></p-button>
+                            <div class="text-center mt-4">
+                                <span class="text-muted-color">Don't have an account? </span>
+                                <span class="font-medium cursor-pointer text-primary" (click)="toggleMode()">Sign Up</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -64,8 +78,81 @@ import { AppFloatingConfigurator } from '../../layout/component/app.floatingconf
 })
 export class Login {
     email: string = '';
-
     password: string = '';
-
     checked: boolean = false;
+    loading: boolean = false;
+    errorMessage: string = '';
+    successMessage: string = '';
+    isRegisterMode: boolean = false;
+
+    constructor(
+        private firebaseService: FirebaseService,
+        private router: Router
+    ) {}
+
+    onLogin() {
+        if (!this.email || !this.password) {
+            this.errorMessage = 'Please enter email and password';
+            return;
+        }
+
+        this.loading = true;
+        this.errorMessage = '';
+        this.successMessage = '';
+
+        if (this.isRegisterMode) {
+            // Register new user
+            this.firebaseService.register(this.email, this.password).subscribe({
+                next: (result) => {
+                    this.loading = false;
+                    this.successMessage = 'Account created successfully! Redirecting...';
+                    setTimeout(() => this.router.navigate(['/dashboard']), 1500);
+                },
+                error: (error) => {
+                    this.loading = false;
+                    this.errorMessage = this.getErrorMessage(error.code);
+                }
+            });
+        } else {
+            // Login existing user
+            this.firebaseService.login(this.email, this.password).subscribe({
+                next: (result) => {
+                    this.loading = false;
+                    this.successMessage = 'Login successful! Redirecting...';
+                    setTimeout(() => this.router.navigate(['/dashboard']), 1000);
+                },
+                error: (error) => {
+                    this.loading = false;
+                    this.errorMessage = this.getErrorMessage(error.code);
+                }
+            });
+        }
+    }
+
+    toggleMode() {
+        this.isRegisterMode = !this.isRegisterMode;
+        this.errorMessage = '';
+        this.successMessage = '';
+    }
+
+    getErrorMessage(code: string): string {
+        switch (code) {
+            case 'auth/invalid-email':
+                return 'Invalid email address';
+            case 'auth/user-disabled':
+                return 'This account has been disabled';
+            case 'auth/user-not-found':
+                return 'No account found with this email';
+            case 'auth/wrong-password':
+                return 'Incorrect password';
+            case 'auth/email-already-in-use':
+                return 'Email already registered';
+            case 'auth/weak-password':
+                return 'Password should be at least 6 characters';
+            case 'auth/invalid-credential':
+                return 'Invalid email or password';
+            default:
+                return 'Login failed. Please try again.';
+        }
+    }
 }
