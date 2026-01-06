@@ -11,6 +11,7 @@ import { AdminPendingOrdersComponent } from './orders/admin-pending-orders.compo
 import { AdminInProgressOrdersComponent } from './orders/admin-in-progress-orders.component';
 import { AdminCompletedOrdersComponent } from './orders/admin-completed-orders.component';
 import { AdminTodayOrdersComponent } from './orders/admin-today-orders.component';
+import { AdminPaymentVerificationComponent } from './orders/admin-payment-verification.component';
 import { adminGuard } from '../guards/admin.guard';
 
 export default [
@@ -25,6 +26,7 @@ export default [
     { path: 'admin/orders/pending', component: AdminPendingOrdersComponent, canActivate: [adminGuard] },
     { path: 'admin/orders/progress', component: AdminInProgressOrdersComponent, canActivate: [adminGuard] },
     { path: 'admin/orders/completed', component: AdminCompletedOrdersComponent, canActivate: [adminGuard] },
+    { path: 'admin/payments/verify', component: AdminPaymentVerificationComponent, canActivate: [adminGuard] },
     { path: 'profile', component: ProfileComponent },
     { path: '**', redirectTo: '/notfound' }
 ] as Routes;

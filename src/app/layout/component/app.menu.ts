@@ -173,27 +173,7 @@ export class AppMenu {
                     }
                 ]
             },
-            {
-                label: 'Service Management',
-                icon: 'pi pi-fw pi-box',
-                items: [
-                    {
-                        label: 'Services List',
-                        icon: 'pi pi-fw pi-list',
-                        routerLink: ['/admin/services/list']
-                    },
-                    {
-                        label: 'Add Service',
-                        icon: 'pi pi-fw pi-plus',
-                        routerLink: ['/admin/services/add']
-                    },
-                    {
-                        label: 'Edit Pricing',
-                        icon: 'pi pi-fw pi-dollar',
-                        routerLink: ['/admin/services/pricing']
-                    }
-                ]
-            },
+
             {
                 label: 'Payment Management',
                 icon: 'pi pi-fw pi-wallet',
@@ -201,7 +181,7 @@ export class AppMenu {
                     {
                         label: 'Pending Verification',
                         icon: 'pi pi-fw pi-exclamation-circle',
-                        routerLink: ['/admin/payments/pending']
+                        routerLink: ['/pages/admin/payments/verify']
                     },
                     {
                         label: 'Verified Payments',
