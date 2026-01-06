@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -147,8 +147,8 @@ import { SelectButtonModule } from 'primeng/selectbutton';
                 </div>
 
                 <div style="margin-top: 2rem; display: flex; gap: 0.5rem; justify-content: space-between;">
-                    <p-button label="Cancel" severity="secondary" icon="pi pi-times" (onClick)="onCancel()"></p-button>
-                    <p-button label="Submit Order" severity="success" icon="pi pi-check" (onClick)="onSubmit()"></p-button>
+                    <p-button label="Back to Dashboard" severity="secondary" icon="pi pi-home" (onClick)="onCancel()"></p-button>
+                    <p-button label="Submit Order" severity="success" icon="pi pi-check" (onClick)="onSubmit()" [disabled]="!isFormValid() || isSubmitting"></p-button>
                 </div>
             </p-card>
         </div>
@@ -158,6 +158,8 @@ export class NewOrderComponent {
     isDragOver = false;
     isSubmitting = false;
     uploads: { name: string; size: number; file: File }[] = [];
+
+    router = inject(Router);
 
     paymentMethods = [
         { label: 'GCash', value: 'gcash' },
@@ -228,6 +230,14 @@ export class NewOrderComponent {
         this.uploads = this.uploads.filter((f) => f.name !== name);
     }
 
+    isFormValid(): boolean {
+        const hasFiles = this.uploads.length > 0;
+        const hasPrint = !!this.paperSize && !!this.colorMode && !!this.paperType && this.copies >= 1;
+        const hasPayment = !!this.paymentMethod && !!this.paymentAmount && this.paymentAmount > 0;
+        const gcashOk = this.paymentMethod === 'gcash' ? !!this.paymentReference?.trim() : true;
+        return hasFiles && hasPrint && hasPayment && gcashOk;
+    }
+
     formatSize(bytes: number): string {
         if (bytes < 1024) return `${bytes} B`;
         const kb = bytes / 1024;
@@ -274,10 +284,6 @@ export class NewOrderComponent {
     }
 
     onCancel() {
-        // TODO: Implement cancel logic with confirmation
-        if (confirm('Are you sure you want to cancel? All changes will be lost.')) {
-            // Reset form or navigate back
-            console.log('Order cancelled');
-        }
+        this.router.navigate(['/dashboard']);
     }
 }
