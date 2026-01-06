@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MenuItem } from 'primeng/api';
 import { AppMenuitem } from './app.menuitem';
+import { FirebaseService } from '../../services/firebase.service';
 
 @Component({
     selector: 'app-menu',
@@ -20,135 +21,280 @@ import { AppMenuitem } from './app.menuitem';
 })
 export class AppMenu {
     model: MenuItem[] = [];
+    userRole: string = 'customer'; // Default role, will be updated from Firebase
+
+    constructor(private firebaseService: FirebaseService) {}
 
     ngOnInit() {
-        this.model = [
-            {
-                label: 'Home',
-                items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/dashboard'] }]
-            },
+        // show guest menu immediately before auth state resolves
+        this.buildMenu('guest');
 
+        // Listen to auth state and update menu based on role
+        this.firebaseService.getCurrentUser().subscribe((user) => {
+            if (user) {
+                // TODO: Get user role from Firestore users collection
+                // For now, using default 'customer' role
+                this.buildMenu(this.userRole);
+            } else {
+                this.buildMenu('guest');
+            }
+        });
+    }
+
+    buildMenu(role: string) {
+        if (role === 'admin') {
+            this.model = this.getAdminMenu();
+        } else if (role === 'customer') {
+            this.model = this.getCustomerMenu();
+        } else {
+            this.model = this.getGuestMenu();
+        }
+    }
+
+    getCustomerMenu(): MenuItem[] {
+        return [
             {
-                label: 'Pages',
-                icon: 'pi pi-fw pi-briefcase',
-                path: '/pages',
+                label: 'Dashboard',
                 items: [
-                    // {
-                    //     label: 'Landing',
-                    //     icon: 'pi pi-fw pi-globe',
-                    //     routerLink: ['/landing']
-                    // },
-                    // {
-                    //     label: 'Auth',
-                    //     icon: 'pi pi-fw pi-user',
-                    //     path: '/auth',
-                    //     items: [
-                    //         {
-                    //             label: 'Login',
-                    //             icon: 'pi pi-fw pi-sign-in',
-                    //             routerLink: ['/auth/login']
-                    //         },
-                    //         {
-                    //             label: 'Error',
-                    //             icon: 'pi pi-fw pi-times-circle',
-                    //             routerLink: ['/auth/error']
-                    //         },
-                    //         {
-                    //             label: 'Access Denied',
-                    //             icon: 'pi pi-fw pi-lock',
-                    //             routerLink: ['/auth/access']
-                    //         }
-                    //     ]
-                    // },
+                    {
+                        label: 'Overview',
+                        icon: 'pi pi-fw pi-home',
+                        routerLink: ['/dashboard']
+                    }
+                ]
+            },
+            {
+                label: 'Orders',
+                icon: 'pi pi-fw pi-file',
+                items: [
                     {
                         label: 'New Order',
                         icon: 'pi pi-fw pi-plus-circle',
                         routerLink: ['/pages/orders/new']
                     },
                     {
-                        label: 'Crud',
-                        icon: 'pi pi-fw pi-pencil',
-                        routerLink: ['/pages/crud']
+                        label: 'My Orders',
+                        icon: 'pi pi-fw pi-list',
+                        routerLink: ['/pages/orders/list']
+                    },
+                    {
+                        label: 'Order History',
+                        icon: 'pi pi-fw pi-history',
+                        routerLink: ['/pages/orders/history']
                     }
-                    // {
-                    //     label: 'Not Found',
-                    //     icon: 'pi pi-fw pi-exclamation-circle',
-                    //     routerLink: ['/pages/notfound']
-                    // },
-                    // {
-                    //     label: 'Empty',
-                    //     icon: 'pi pi-fw pi-circle-off',
-                    //     routerLink: ['/pages/empty']
-                    // }
+                ]
+            },
+            {
+                label: 'Payments',
+                icon: 'pi pi-fw pi-wallet',
+                items: [
+                    {
+                        label: 'Pending Payments',
+                        icon: 'pi pi-fw pi-clock',
+                        routerLink: ['/pages/payments/pending']
+                    },
+                    {
+                        label: 'Payment History',
+                        icon: 'pi pi-fw pi-credit-card',
+                        routerLink: ['/pages/payments/history']
+                    }
+                ]
+            },
+            {
+                label: 'Services',
+                icon: 'pi pi-fw pi-box',
+                items: [
+                    {
+                        label: 'View Services',
+                        icon: 'pi pi-fw pi-eye',
+                        routerLink: ['/pages/services/view']
+                    },
+                    {
+                        label: 'Pricing',
+                        icon: 'pi pi-fw pi-dollar',
+                        routerLink: ['/pages/services/pricing']
+                    }
+                ]
+            },
+            { separator: true },
+            {
+                label: 'Account',
+                icon: 'pi pi-fw pi-user',
+                items: [
+                    {
+                        label: 'Profile',
+                        icon: 'pi pi-fw pi-user-edit',
+                        routerLink: ['/pages/profile']
+                    },
+                    {
+                        label: 'Settings',
+                        icon: 'pi pi-fw pi-cog',
+                        routerLink: ['/pages/settings']
+                    }
                 ]
             }
-            // {
-            //     label: 'Hierarchy',
-            //     path: '/hierarchy',
-            //     items: [
-            //         {
-            //             label: 'Submenu 1',
-            //             icon: 'pi pi-fw pi-bookmark',
-            //             path: '/hierarchy/submenu_1',
-            //             items: [
-            //                 {
-            //                     label: 'Submenu 1.1',
-            //                     icon: 'pi pi-fw pi-bookmark',
-            //                     path: '/hierarchy/submenu_1/submenu_1_1',
-            //                     items: [
-            //                         { label: 'Submenu 1.1.1', icon: 'pi pi-fw pi-bookmark' },
-            //                         { label: 'Submenu 1.1.2', icon: 'pi pi-fw pi-bookmark' },
-            //                         { label: 'Submenu 1.1.3', icon: 'pi pi-fw pi-bookmark' }
-            //                     ]
-            //                 },
-            //                 {
-            //                     label: 'Submenu 1.2',
-            //                     icon: 'pi pi-fw pi-bookmark',
-            //                     path: '/hierarchy/submenu_1/submenu_1_2',
-            //                     items: [{ label: 'Submenu 1.2.1', icon: 'pi pi-fw pi-bookmark' }]
-            //                 }
-            //             ]
-            //         },
-            //         {
-            //             label: 'Submenu 2',
-            //             icon: 'pi pi-fw pi-bookmark',
-            //             path: '/hierarchy/submenu_2',
-            //             items: [
-            //                 {
-            //                     label: 'Submenu 2.1',
-            //                     icon: 'pi pi-fw pi-bookmark',
-            //                     path: '/hierarchy/submenu_2/submenu_2_1',
-            //                     items: [
-            //                         { label: 'Submenu 2.1.1', icon: 'pi pi-fw pi-bookmark' },
-            //                         { label: 'Submenu 2.1.2', icon: 'pi pi-fw pi-bookmark' }
-            //                     ]
-            //                 },
-            //                 {
-            //                     label: 'Submenu 2.2',
-            //                     icon: 'pi pi-fw pi-bookmark',
-            //                     path: '/hierarchy/submenu_2/submenu_2_2',
-            //                     items: [{ label: 'Submenu 2.2.1', icon: 'pi pi-fw pi-bookmark' }]
-            //                 }
-            //             ]
-            //         }
-            //     ]
-            // },
-            // {
-            //     label: 'Get Started',
-            //     items: [
-            //         {
-            //             label: 'Documentation',
-            //             icon: 'pi pi-fw pi-book',
-            //             routerLink: ['/documentation']
-            //         },
-            //         {
-            //             label: 'View Source',
-            //             icon: 'pi pi-fw pi-github',
-            //             url: 'https://github.com/primefaces/sakai-ng',
-            //             target: '_blank'
-            //         }
-            //     ]
-            // }
+        ];
+    }
+
+    getAdminMenu(): MenuItem[] {
+        return [
+            {
+                label: 'Dashboard',
+                items: [
+                    {
+                        label: 'Statistics',
+                        icon: 'pi pi-fw pi-chart-bar',
+                        routerLink: ['/dashboard']
+                    },
+                    {
+                        label: "Today's Orders",
+                        icon: 'pi pi-fw pi-calendar-clock',
+                        routerLink: ['/dashboard/today']
+                    }
+                ]
+            },
+            {
+                label: 'Order Management',
+                icon: 'pi pi-fw pi-file',
+                items: [
+                    {
+                        label: 'All Orders',
+                        icon: 'pi pi-fw pi-list',
+                        routerLink: ['/admin/orders/all']
+                    },
+                    {
+                        label: 'Pending Orders',
+                        icon: 'pi pi-fw pi-clock',
+                        routerLink: ['/admin/orders/pending']
+                    },
+                    {
+                        label: 'In Progress',
+                        icon: 'pi pi-fw pi-spin pi-spinner',
+                        routerLink: ['/admin/orders/progress']
+                    },
+                    {
+                        label: 'Completed',
+                        icon: 'pi pi-fw pi-check-circle',
+                        routerLink: ['/admin/orders/completed']
+                    }
+                ]
+            },
+            {
+                label: 'Service Management',
+                icon: 'pi pi-fw pi-box',
+                items: [
+                    {
+                        label: 'Services List',
+                        icon: 'pi pi-fw pi-list',
+                        routerLink: ['/admin/services/list']
+                    },
+                    {
+                        label: 'Add Service',
+                        icon: 'pi pi-fw pi-plus',
+                        routerLink: ['/admin/services/add']
+                    },
+                    {
+                        label: 'Edit Pricing',
+                        icon: 'pi pi-fw pi-dollar',
+                        routerLink: ['/admin/services/pricing']
+                    }
+                ]
+            },
+            {
+                label: 'Payment Management',
+                icon: 'pi pi-fw pi-wallet',
+                items: [
+                    {
+                        label: 'Pending Verification',
+                        icon: 'pi pi-fw pi-exclamation-circle',
+                        routerLink: ['/admin/payments/pending']
+                    },
+                    {
+                        label: 'Verified Payments',
+                        icon: 'pi pi-fw pi-check',
+                        routerLink: ['/admin/payments/verified']
+                    },
+                    {
+                        label: 'Payment History',
+                        icon: 'pi pi-fw pi-history',
+                        routerLink: ['/admin/payments/history']
+                    }
+                ]
+            },
+            {
+                label: 'User Management',
+                icon: 'pi pi-fw pi-users',
+                items: [
+                    {
+                        label: 'All Users',
+                        icon: 'pi pi-fw pi-users',
+                        routerLink: ['/admin/users/all']
+                    },
+                    {
+                        label: 'Customer List',
+                        icon: 'pi pi-fw pi-user',
+                        routerLink: ['/admin/users/customers']
+                    }
+                ]
+            },
+            {
+                label: 'Reports',
+                icon: 'pi pi-fw pi-chart-line',
+                items: [
+                    {
+                        label: 'Sales Report',
+                        icon: 'pi pi-fw pi-chart-bar',
+                        routerLink: ['/admin/reports/sales']
+                    },
+                    {
+                        label: 'Order Analytics',
+                        icon: 'pi pi-fw pi-chart-pie',
+                        routerLink: ['/admin/reports/analytics']
+                    }
+                ]
+            },
+            { separator: true },
+            {
+                label: 'Account',
+                icon: 'pi pi-fw pi-user',
+                items: [
+                    {
+                        label: 'Profile',
+                        icon: 'pi pi-fw pi-user-edit',
+                        routerLink: ['/pages/profile']
+                    },
+                    {
+                        label: 'Settings',
+                        icon: 'pi pi-fw pi-cog',
+                        routerLink: ['/pages/settings']
+                    }
+                ]
+            }
+        ];
+    }
+
+    getGuestMenu(): MenuItem[] {
+        return [
+            {
+                label: 'Welcome',
+                items: [
+                    {
+                        label: 'Home',
+                        icon: 'pi pi-fw pi-home',
+                        routerLink: ['/landing']
+                    },
+                    {
+                        label: 'Sign In',
+                        icon: 'pi pi-fw pi-sign-in',
+                        routerLink: ['/auth/login']
+                    },
+                    {
+                        label: 'Sign Up',
+                        icon: 'pi pi-fw pi-user-plus',
+                        routerLink: ['/auth/signup']
+                    }
+                ]
+            }
         ];
     }
 }
