@@ -16,9 +16,9 @@ import { Order } from '@/app/models';
     imports: [CommonModule, CardModule, ChartModule, TableModule, TagModule, ButtonModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
-        <!-- Cover Image -->
-        <div class="mb-6 rounded-lg overflow-hidden shadow-md">
-            <img src="/cover.jpg" alt="Cover" class="w-full h-auto object-contain" style="max-height: 350px;" />
+        <!-- Cover Image - Full Width -->
+        <div class="-mx-6 rounded-lg overflow-hidden shadow-md mb-8">
+            <img src="/cover.jpg" alt="Cover" class="w-screen block object-contain" style="max-height: 350px;" />
         </div>
 
         <!-- Stats Overview -->
