@@ -51,8 +51,9 @@ export class PaymentsService {
         const q = query(paymentsRef, where('userId', '==', userId));
 
         return from(getDocs(q)).pipe(
-            map((snapshot) =>
-                snapshot.docs.map((doc) => {
+            map((snapshot) => {
+                console.log(`[PaymentsService] Found ${snapshot.docs.length} payments for user ${userId}`);
+                const payments = snapshot.docs.map((doc) => {
                     const docData = doc.data();
                     return {
                         paymentId: doc.id,
@@ -61,8 +62,10 @@ export class PaymentsService {
                         paymentDate: docData['paymentDate']?.toDate(),
                         updatedAt: docData['updatedAt']?.toDate()
                     } as unknown as Payment;
-                })
-            )
+                });
+                console.log('[PaymentsService] Mapped payments:', payments);
+                return payments;
+            })
         );
     }
 

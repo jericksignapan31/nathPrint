@@ -59,8 +59,9 @@ export class OrdersService {
         const q = query(ordersRef, where('userId', '==', userId));
 
         return from(getDocs(q)).pipe(
-            map((snapshot) =>
-                snapshot.docs.map(
+            map((snapshot) => {
+                console.log(`[OrdersService] Found ${snapshot.docs.length} orders for user ${userId}`);
+                const orders = snapshot.docs.map(
                     (doc) =>
                         ({
                             orderId: doc.id,
@@ -68,8 +69,10 @@ export class OrdersService {
                             createdAt: doc.data()['createdAt']?.toDate(),
                             updatedAt: doc.data()['updatedAt']?.toDate()
                         }) as Order
-                )
-            )
+                );
+                console.log('[OrdersService] Mapped orders:', orders);
+                return orders;
+            })
         );
     }
 

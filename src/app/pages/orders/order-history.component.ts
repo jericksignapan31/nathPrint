@@ -6,6 +6,7 @@ import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { CardModule } from 'primeng/card';
 import { TooltipModule } from 'primeng/tooltip';
+import { switchMap, filter } from 'rxjs/operators';
 import { OrdersService } from '@/app/services/orders.service';
 import { UserService } from '@/app/services/user.service';
 import { Order } from '@/app/models';
@@ -74,20 +75,31 @@ export class OrderHistoryComponent implements OnInit {
     }
 
     loadOrderHistory() {
-        this.userService.getCurrentUserData().subscribe((user) => {
-            if (user?.uid) {
-                this.ordersService.getUserOrders(user.uid).subscribe({
-                    next: (orders) => {
-                        // Filter only completed orders
-                        this.orders = orders.filter((order) => order.status === 'completed');
-                        this.cdr.markForCheck();
-                    },
-                    error: (err) => {
-                        console.error('Failed to load order history:', err);
-                    }
-                });
-            }
-        });
+        this.userService
+            .getCurrentUserData()
+            .pipe(
+                filter((user) => {
+                    console.log('[OrderHistory] User data:', user);
+                    return !!user?.uid;
+                }),
+                switchMap((user) => {
+                    console.log('[OrderHistory] Fetching orders for user:', user?.uid);
+                    return this.ordersService.getUserOrders(user!.uid);
+                })
+            )
+            .subscribe({
+                next: (orders) => {
+                    console.log('[OrderHistory] All orders:', orders);
+                    // Filter only completed orders
+                    const filtered = orders.filter((order) => order.status === 'completed');
+                    console.log('[OrderHistory] Completed orders:', filtered);
+                    this.orders = filtered;
+                    this.cdr.markForCheck();
+                },
+                error: (err) => {
+                    console.error('[OrderHistory] Failed to load order history:', err);
+                }
+            });
     }
 
     getStatusSeverity(status: string): 'info' | 'success' | 'warn' | 'danger' {
