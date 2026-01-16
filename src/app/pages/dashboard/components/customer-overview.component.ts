@@ -18,7 +18,7 @@ import { Order } from '@/app/models';
     template: `
         <!-- Cover Image -->
         <div class="mb-6 rounded-lg overflow-hidden shadow-md">
-            <img src="assets/cover.jpg" alt="Cover" class="w-full h-auto object-cover" style="max-height: 300px;" />
+            <img src="/cover.jpg" alt="Cover" class="w-full h-auto object-contain" style="max-height: 350px;" />
         </div>
 
         <!-- Stats Overview -->
