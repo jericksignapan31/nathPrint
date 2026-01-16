@@ -94,39 +94,8 @@ export class AppMenu {
                     }
                 ]
             },
-            {
-                label: 'Services',
-                icon: 'pi pi-fw pi-box',
-                items: [
-                    {
-                        label: 'View Services',
-                        icon: 'pi pi-fw pi-eye',
-                        routerLink: ['/pages/services/view']
-                    },
-                    {
-                        label: 'Pricing',
-                        icon: 'pi pi-fw pi-dollar',
-                        routerLink: ['/pages/services/pricing']
-                    }
-                ]
-            },
-            { separator: true },
-            {
-                label: 'Account',
-                icon: 'pi pi-fw pi-user',
-                items: [
-                    {
-                        label: 'Profile',
-                        icon: 'pi pi-fw pi-user-edit',
-                        routerLink: ['/pages/profile']
-                    },
-                    {
-                        label: 'Settings',
-                        icon: 'pi pi-fw pi-cog',
-                        routerLink: ['/pages/settings']
-                    }
-                ]
-            }
+
+            { separator: true }
         ];
     }
 

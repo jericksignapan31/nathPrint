@@ -46,9 +46,7 @@ import { Payment } from '@/app/models';
                             <td colspan="5">
                                 <div class="flex flex-col items-center justify-center py-12 text-center">
                                     <i class="pi pi-check-circle text-4xl text-gray-300 mb-4"></i>
-                                    <p class="text-lg font-semibold text-gray-600 mb-2">All Paid</p>
                                     <p class="text-sm text-gray-400 mb-6">You don't have any pending payments at the moment.</p>
-                                    <p-button label="Create Order" routerLink="/pages/orders/new" icon="pi pi-plus"></p-button>
                                 </div>
                             </td>
                         </tr>

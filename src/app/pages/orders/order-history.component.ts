@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TableModule } from 'primeng/table';
@@ -17,8 +17,8 @@ import { Order } from '@/app/models';
     changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
         <div class="card">
-            <p-card header="Order History" styleClass="mb-0">
-                <p-table [value]="orders" [rows]="10" [paginator]="true" responsiveLayout="scroll" [globalFilterFields]="['orderId', 'status']">
+            <p-card header="Completed Orders" styleClass="mb-0">
+                <p-table [value]="orders" [rows]="10" [paginator]="true" responsiveLayout="scroll" [globalFilterFields]="['orderId']">
                     <ng-template pTemplate="header">
                         <tr>
                             <th pSortableColumn="orderId">Order ID <p-sortIcon field="orderId"></p-sortIcon></th>
@@ -65,6 +65,7 @@ import { Order } from '@/app/models';
 export class OrderHistoryComponent implements OnInit {
     private ordersService = inject(OrdersService);
     private userService = inject(UserService);
+    private cdr = inject(ChangeDetectorRef);
 
     orders: Order[] = [];
 
@@ -77,7 +78,9 @@ export class OrderHistoryComponent implements OnInit {
             if (user?.uid) {
                 this.ordersService.getUserOrders(user.uid).subscribe({
                     next: (orders) => {
-                        this.orders = orders;
+                        // Filter only completed orders
+                        this.orders = orders.filter((order) => order.status === 'completed');
+                        this.cdr.markForCheck();
                     },
                     error: (err) => {
                         console.error('Failed to load order history:', err);

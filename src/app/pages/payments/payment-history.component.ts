@@ -59,7 +59,6 @@ import { Payment } from '@/app/models';
                                     <i class="pi pi-credit-card text-4xl text-gray-300 mb-4"></i>
                                     <p class="text-lg font-semibold text-gray-600 mb-2">No Payments Yet</p>
                                     <p class="text-sm text-gray-400 mb-6">You haven't made any payments yet.</p>
-                                    <p-button label="Create Order" routerLink="/pages/orders/new" icon="pi pi-plus"></p-button>
                                 </div>
                             </td>
                         </tr>
