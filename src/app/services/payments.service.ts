@@ -100,9 +100,7 @@ export class PaymentsService {
     // Verify payment (admin)
     verifyPayment(paymentId: string, adminUid: string): Observable<void> {
         return this.updatePayment(paymentId, {
-            status: 'verified',
-            verifiedBy: adminUid,
-            paymentDate: new Date()
+            status: 'paid'
         });
     }
 }

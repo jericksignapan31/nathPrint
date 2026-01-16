@@ -5,8 +5,14 @@ import { Empty } from './empty/empty';
 import { NewOrderComponent } from './orders/new-order.component';
 import { OrdersListComponent } from './orders/orders-list.component';
 import { OrderDetailComponent } from './orders/order-detail.component';
+import { OrderHistoryComponent } from './orders/order-history.component';
 import { ProfileComponent } from './profile/profile.component';
 import { AccountComponent } from './profile/account.component';
+import { PendingPaymentsComponent } from './payments/pending-payments.component';
+import { PaymentHistoryComponent } from './payments/payment-history.component';
+import { ServicesViewComponent } from './services/services-view.component';
+import { ServicesPricingComponent } from './services/services-pricing.component';
+import { SettingsComponent } from './settings/settings.component';
 import { AdminOrdersComponent } from './orders/admin-orders.component';
 import { AdminPendingOrdersComponent } from './orders/admin-pending-orders.component';
 import { AdminInProgressOrdersComponent } from './orders/admin-in-progress-orders.component';
@@ -26,6 +32,11 @@ export default [
     { path: 'orders', component: OrdersListComponent },
     { path: 'orders/new', component: NewOrderComponent },
     { path: 'orders/:id', component: OrderDetailComponent },
+    { path: 'orders/history', component: OrderHistoryComponent },
+    { path: 'payments/pending', component: PendingPaymentsComponent },
+    { path: 'payments/history', component: PaymentHistoryComponent },
+    { path: 'services/view', component: ServicesViewComponent },
+    { path: 'services/pricing', component: ServicesPricingComponent },
     { path: 'admin/dashboard/today', component: AdminTodayOrdersComponent, canActivate: [adminGuard] },
     { path: 'admin/orders/all', component: AdminOrdersComponent, canActivate: [adminGuard] },
     { path: 'admin/orders/pending', component: AdminPendingOrdersComponent, canActivate: [adminGuard] },
@@ -38,5 +49,6 @@ export default [
     { path: 'admin/users/customers', component: AdminCustomerListComponent, canActivate: [adminGuard] },
     { path: 'profile', component: ProfileComponent },
     { path: 'account', component: AccountComponent },
+    { path: 'settings', component: SettingsComponent },
     { path: '**', redirectTo: '/notfound' }
 ] as Routes;
