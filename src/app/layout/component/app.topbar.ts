@@ -13,6 +13,13 @@ import { UserService } from '@/app/services/user.service';
     selector: 'app-topbar',
     standalone: true,
     imports: [RouterModule, CommonModule, StyleClassModule, MenuModule, AppConfigurator],
+    styles: [
+        `
+            :host ::ng-deep .layout-topbar-action-highlight {
+                color: #621517;
+            }
+        `
+    ],
     template: ` <div class="layout-topbar">
         <div class="layout-topbar-logo-container">
             <button class="layout-menu-button layout-topbar-action" (click)="layoutService.onMenuToggle()">
@@ -46,17 +53,10 @@ import { UserService } from '@/app/services/user.service';
                     <i [ngClass]="{ 'pi ': true, 'pi-moon': layoutService.isDarkTheme(), 'pi-sun': !layoutService.isDarkTheme() }"></i>
                 </button>
                 <div class="relative">
-                    <button
-                        class="layout-topbar-action layout-topbar-action-highlight"
-                        pStyleClass="@next"
-                        enterFromClass="hidden"
-                        enterActiveClass="animate-scalein"
-                        leaveToClass="hidden"
-                        leaveActiveClass="animate-fadeout"
-                        [hideOnOutsideClick]="true"
-                    >
+                    <button #colorButton type="button" class="layout-topbar-action layout-topbar-action-highlight" (click)="onColorMenuToggle($event)" [attr.aria-haspopup]="true" [attr.aria-expanded]="colorMenuActive">
                         <i class="pi pi-palette"></i>
                     </button>
+                    <p-menu #colorMenu [model]="colorMenuItems" [popup]="true" [appendTo]="'body'" (onHide)="colorMenuActive = false"></p-menu>
                     <app-configurator />
                 </div>
             </div>
@@ -80,9 +80,13 @@ export class AppTopbar {
     items!: MenuItem[];
     profileMenuItems: MenuItem[] = [];
     profileMenuActive = false;
+    colorMenuItems: MenuItem[] = [];
+    colorMenuActive = false;
 
     @ViewChild('profileMenu') profileMenu: any;
     @ViewChild('profileButton') profileButton: ElementRef | undefined;
+    @ViewChild('colorMenu') colorMenu: any;
+    @ViewChild('colorButton') colorButton: ElementRef | undefined;
 
     layoutService = inject(LayoutService);
     firebaseService = inject(FirebaseService);
@@ -93,6 +97,7 @@ export class AppTopbar {
 
     ngOnInit() {
         this.initProfileMenu();
+        this.initColorMenu();
 
         // Console log current user data
         this.currentUser$.subscribe((user) => {
@@ -106,6 +111,11 @@ export class AppTopbar {
         this.firebaseService.getCurrentUser().subscribe((authUser) => {
             console.log('Firebase Auth User:', authUser);
         });
+    }
+
+    ngAfterViewInit() {
+        // Set brown as default theme color
+        this.setThemeColor('#621517');
     }
 
     initProfileMenu() {
@@ -135,6 +145,75 @@ export class AppTopbar {
                 }
             }
         ];
+    }
+
+    initColorMenu() {
+        this.colorMenuItems = [
+            {
+                label: 'Colors',
+                items: [
+                    {
+                        label: '🔴 Red',
+                        command: () => {
+                            this.setThemeColor('#EF4444');
+                        }
+                    },
+                    {
+                        label: '🟠 Orange',
+                        command: () => {
+                            this.setThemeColor('#F97316');
+                        }
+                    },
+                    {
+                        label: '🟡 Yellow',
+                        command: () => {
+                            this.setThemeColor('#EAB308');
+                        }
+                    },
+                    {
+                        label: '🟢 Green',
+                        command: () => {
+                            this.setThemeColor('#22C55E');
+                        }
+                    },
+                    {
+                        label: '🔵 Blue',
+                        command: () => {
+                            this.setThemeColor('#3B82F6');
+                        }
+                    },
+                    {
+                        label: '🟣 Purple',
+                        command: () => {
+                            this.setThemeColor('#A855F7');
+                        }
+                    },
+                    {
+                        label: '🩷 Pink',
+                        command: () => {
+                            this.setThemeColor('#EC4899');
+                        }
+                    },
+                    {
+                        label: '🟤 Brown',
+                        command: () => {
+                            this.setThemeColor('#621517');
+                        }
+                    }
+                ]
+            }
+        ];
+    }
+
+    setThemeColor(color: string) {
+        const style = document.documentElement.style;
+        style.setProperty('--primary-color', color);
+        this.colorMenuActive = false;
+    }
+
+    onColorMenuToggle(event: Event) {
+        this.colorMenuActive = true;
+        this.colorMenu.toggle(event);
     }
 
     onProfileMenuToggle(event: Event) {

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild, ElementRef, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
@@ -8,17 +8,77 @@ import { PasswordModule } from 'primeng/password';
 import { RippleModule } from 'primeng/ripple';
 import { MessageModule } from 'primeng/message';
 import { CommonModule } from '@angular/common';
-import { AppFloatingConfigurator } from '../../layout/component/app.floatingconfigurator';
+import { MenuModule } from 'primeng/menu';
+import { MenuItem } from 'primeng/api';
 import { FirebaseService } from '../../services/firebase.service';
 import { UserService } from '../../services/user.service';
+import { LayoutService } from '../../layout/service/layout.service';
 
 @Component({
     selector: 'app-login',
     standalone: true,
-    imports: [CommonModule, ButtonModule, CheckboxModule, InputTextModule, PasswordModule, FormsModule, RouterModule, RippleModule, AppFloatingConfigurator, MessageModule],
+    imports: [CommonModule, ButtonModule, CheckboxModule, InputTextModule, PasswordModule, FormsModule, RouterModule, RippleModule, MessageModule, MenuModule],
+    styles: [
+        `
+            :host ::ng-deep {
+                --primary-color: #621517 !important;
+
+                .color-button {
+                    color: #621517;
+                }
+
+                .text-primary {
+                    color: #621517 !important;
+                }
+
+                p-button .p-button {
+                    background-color: #621517 !important;
+                    border-color: #621517 !important;
+                    color: white;
+                }
+
+                p-button .p-button-label {
+                    color: white !important;
+                }
+
+                p-button .p-button:hover {
+                    background-color: #4a0f0f !important;
+                    border-color: #4a0f0f !important;
+                }
+
+                p-button[styleClass*='p-button-outlined'] .p-button {
+                    background-color: transparent !important;
+                    border: 2px solid #621517 !important;
+                    color: #621517 !important;
+                }
+
+                p-button[styleClass*='p-button-outlined'] .p-button-label {
+                    color: #621517 !important;
+                }
+
+                p-button[styleClass*='p-button-outlined'] .p-button:hover {
+                    background-color: #621517 !important;
+                    color: white !important;
+                }
+
+                p-button[styleClass*='p-button-outlined'] .p-button-label:hover {
+                    color: white !important;
+                }
+
+                a.text-primary,
+                span.text-primary {
+                    color: #621517 !important;
+                }
+            }
+        `
+    ],
     template: `
-        <app-floating-configurator />
         <div class="bg-surface-50 dark:bg-surface-950 flex items-center justify-center min-h-screen min-w-screen overflow-hidden">
+            <!-- Color Menu Button (Top Right) -->
+            <div class="fixed top-4 right-4">
+                <p-menu #colorMenu [model]="colorMenuItems" [popup]="true" [appendTo]="'body'" (onHide)="colorMenuActive = false"></p-menu>
+            </div>
+
             <div class="flex flex-col items-center justify-center">
                 <div style="border-radius: 56px; padding: 0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)">
                     <div class="w-full bg-surface-0 dark:bg-surface-900 py-20 px-8 sm:px-20" style="border-radius: 53px">
@@ -95,12 +155,98 @@ export class Login {
     errorMessage: string = '';
     successMessage: string = '';
     isRegisterMode: boolean = false;
+    colorMenuItems: MenuItem[] = [];
+    colorMenuActive = false;
 
-    constructor(
-        private firebaseService: FirebaseService,
-        private userService: UserService,
-        private router: Router
-    ) {}
+    @ViewChild('colorMenu') colorMenu: any;
+    @ViewChild('colorButton') colorButton: ElementRef | undefined;
+
+    firebaseService = inject(FirebaseService);
+    userService = inject(UserService);
+    router = inject(Router);
+    layoutService = inject(LayoutService);
+
+    constructor() {}
+
+    ngOnInit() {
+        this.initColorMenu();
+    }
+
+    ngAfterViewInit() {
+        // Set brown as default theme color for both CSS variable and layout service
+        this.setThemeColor('#621517');
+        // Update layout service to show brown-ish primary color
+        this.layoutService.layoutConfig.update((state) => ({ ...state, primary: 'rose' }));
+    }
+
+    initColorMenu() {
+        this.colorMenuItems = [
+            {
+                label: 'Colors',
+                items: [
+                    {
+                        label: '🔴 Red',
+                        command: () => {
+                            this.setThemeColor('#EF4444');
+                        }
+                    },
+                    {
+                        label: '🟠 Orange',
+                        command: () => {
+                            this.setThemeColor('#F97316');
+                        }
+                    },
+                    {
+                        label: '🟡 Yellow',
+                        command: () => {
+                            this.setThemeColor('#EAB308');
+                        }
+                    },
+                    {
+                        label: '🟢 Green',
+                        command: () => {
+                            this.setThemeColor('#22C55E');
+                        }
+                    },
+                    {
+                        label: '🔵 Blue',
+                        command: () => {
+                            this.setThemeColor('#3B82F6');
+                        }
+                    },
+                    {
+                        label: '🟣 Purple',
+                        command: () => {
+                            this.setThemeColor('#A855F7');
+                        }
+                    },
+                    {
+                        label: '🩷 Pink',
+                        command: () => {
+                            this.setThemeColor('#EC4899');
+                        }
+                    },
+                    {
+                        label: '🟤 Brown',
+                        command: () => {
+                            this.setThemeColor('#621517');
+                        }
+                    }
+                ]
+            }
+        ];
+    }
+
+    setThemeColor(color: string) {
+        const style = document.documentElement.style;
+        style.setProperty('--primary-color', color);
+        this.colorMenuActive = false;
+    }
+
+    onColorMenuToggle(event: Event) {
+        this.colorMenuActive = true;
+        this.colorMenu.toggle(event);
+    }
 
     onLogin() {
         if (!this.email || !this.password) {
