@@ -43,7 +43,7 @@ import { UserService } from '@/app/services/user.service';
                         />
                     </g>
                 </svg>
-                <span>PrintTipid</span>
+                <span>PrinTipid</span>
             </a>
         </div>
 
