@@ -35,7 +35,7 @@ import { UserService } from '@/app/services/user.service';
                         />
                     </g>
                 </svg>
-                <span>NATTY'S PRINTS</span>
+                <span>PrintTipid</span>
             </a>
         </div>
 
@@ -66,14 +66,6 @@ import { UserService } from '@/app/services/user.service';
 
             <div class="layout-topbar-menu hidden lg:block">
                 <div class="layout-topbar-menu-content">
-                    <button type="button" class="layout-topbar-action">
-                        <i class="pi pi-calendar"></i>
-                        <span>Calendar</span>
-                    </button>
-                    <button type="button" class="layout-topbar-action">
-                        <i class="pi pi-inbox"></i>
-                        <span>Messages</span>
-                    </button>
                     <button type="button" class="layout-topbar-action" (click)="onLogout()">
                         <i class="pi pi-sign-out"></i>
                         <span>Logout</span>

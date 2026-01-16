@@ -211,39 +211,8 @@ export class AppMenu {
                     }
                 ]
             },
-            {
-                label: 'Reports',
-                icon: 'pi pi-fw pi-chart-line',
-                items: [
-                    {
-                        label: 'Sales Report',
-                        icon: 'pi pi-fw pi-chart-bar',
-                        routerLink: ['/admin/reports/sales']
-                    },
-                    {
-                        label: 'Order Analytics',
-                        icon: 'pi pi-fw pi-chart-pie',
-                        routerLink: ['/admin/reports/analytics']
-                    }
-                ]
-            },
-            { separator: true },
-            {
-                label: 'Account',
-                icon: 'pi pi-fw pi-user',
-                items: [
-                    {
-                        label: 'Profile',
-                        icon: 'pi pi-fw pi-user-edit',
-                        routerLink: ['/pages/profile']
-                    },
-                    {
-                        label: 'Settings',
-                        icon: 'pi pi-fw pi-cog',
-                        routerLink: ['/pages/settings']
-                    }
-                ]
-            }
+
+            { separator: true }
         ];
     }
 }
