@@ -16,7 +16,31 @@ import { UserService } from '@/app/services/user.service';
     styles: [
         `
             :host ::ng-deep .layout-topbar-action-highlight {
-                color: #621517;
+                color: var(--primary-color);
+            }
+            :host ::ng-deep .layout-topbar-logo span {
+                font-size: 1.4rem;
+                font-weight: 900;
+                font-style: italic;
+                color: #fff;
+                letter-spacing: 0.5px;
+                text-shadow:
+                    -2px -2px 0 var(--primary-color),
+                    2px -2px 0 var(--primary-color),
+                    -2px 2px 0 var(--primary-color),
+                    2px 2px 0 var(--primary-color),
+                    -1px 0 0 var(--primary-color),
+                    1px 0 0 var(--primary-color),
+                    0 -1px 0 var(--primary-color),
+                    0 1px 0 var(--primary-color);
+                filter: drop-shadow(0 3px 6px rgba(98, 21, 23, 0.5));
+                position: relative;
+            }
+            :host ::ng-deep .layout-topbar-logo:hover span {
+                filter: drop-shadow(0 5px 12px rgba(98, 21, 23, 0.6));
+                letter-spacing: 1px;
+                transition: all 0.3s ease;
+                font-size: 1.45rem;
             }
         `
     ],
