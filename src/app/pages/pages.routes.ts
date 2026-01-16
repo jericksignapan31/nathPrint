@@ -6,6 +6,7 @@ import { NewOrderComponent } from './orders/new-order.component';
 import { OrdersListComponent } from './orders/orders-list.component';
 import { OrderDetailComponent } from './orders/order-detail.component';
 import { ProfileComponent } from './profile/profile.component';
+import { AccountComponent } from './profile/account.component';
 import { AdminOrdersComponent } from './orders/admin-orders.component';
 import { AdminPendingOrdersComponent } from './orders/admin-pending-orders.component';
 import { AdminInProgressOrdersComponent } from './orders/admin-in-progress-orders.component';
@@ -36,5 +37,6 @@ export default [
     { path: 'admin/users/all', component: AdminAllUsersComponent, canActivate: [adminGuard] },
     { path: 'admin/users/customers', component: AdminCustomerListComponent, canActivate: [adminGuard] },
     { path: 'profile', component: ProfileComponent },
+    { path: 'account', component: AccountComponent },
     { path: '**', redirectTo: '/notfound' }
 ] as Routes;

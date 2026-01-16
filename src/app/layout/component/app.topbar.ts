@@ -1,8 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ViewChild, ElementRef } from '@angular/core';
 import { MenuItem } from 'primeng/api';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { StyleClassModule } from 'primeng/styleclass';
+import { MenuModule } from 'primeng/menu';
 import { AppConfigurator } from './app.configurator';
 import { LayoutService } from '@/app/layout/service/layout.service';
 import { FirebaseService } from '@/app/services/firebase.service';
@@ -11,7 +12,7 @@ import { UserService } from '@/app/services/user.service';
 @Component({
     selector: 'app-topbar',
     standalone: true,
-    imports: [RouterModule, CommonModule, StyleClassModule, AppConfigurator],
+    imports: [RouterModule, CommonModule, StyleClassModule, MenuModule, AppConfigurator],
     template: ` <div class="layout-topbar">
         <div class="layout-topbar-logo-container">
             <button class="layout-menu-button layout-topbar-action" (click)="layoutService.onMenuToggle()">
@@ -66,10 +67,10 @@ import { UserService } from '@/app/services/user.service';
 
             <div class="layout-topbar-menu hidden lg:block">
                 <div class="layout-topbar-menu-content">
-                    <button type="button" class="layout-topbar-action" (click)="onLogout()">
-                        <i class="pi pi-sign-out"></i>
-                        <span>Logout</span>
+                    <button #profileButton type="button" class="layout-topbar-action" (click)="onProfileMenuToggle($event)" [attr.aria-haspopup]="true" [attr.aria-expanded]="profileMenuActive">
+                        <i class="pi pi-user"></i>
                     </button>
+                    <p-menu #profileMenu [model]="profileMenuItems" [popup]="true" [appendTo]="'body'" (onHide)="profileMenuActive = false"></p-menu>
                 </div>
             </div>
         </div>
@@ -77,6 +78,11 @@ import { UserService } from '@/app/services/user.service';
 })
 export class AppTopbar {
     items!: MenuItem[];
+    profileMenuItems: MenuItem[] = [];
+    profileMenuActive = false;
+
+    @ViewChild('profileMenu') profileMenu: any;
+    @ViewChild('profileButton') profileButton: ElementRef | undefined;
 
     layoutService = inject(LayoutService);
     firebaseService = inject(FirebaseService);
@@ -86,6 +92,8 @@ export class AppTopbar {
     currentUser$ = this.userService.getCurrentUserData();
 
     ngOnInit() {
+        this.initProfileMenu();
+
         // Console log current user data
         this.currentUser$.subscribe((user) => {
             console.log('Current User:', user);
@@ -98,6 +106,40 @@ export class AppTopbar {
         this.firebaseService.getCurrentUser().subscribe((authUser) => {
             console.log('Firebase Auth User:', authUser);
         });
+    }
+
+    initProfileMenu() {
+        this.profileMenuItems = [
+            {
+                label: 'Profile',
+                icon: 'pi pi-user',
+                command: () => {
+                    this.router.navigate(['/pages/profile']);
+                }
+            },
+            {
+                label: 'Account',
+                icon: 'pi pi-cog',
+                command: () => {
+                    this.router.navigate(['/pages/account']);
+                }
+            },
+            {
+                separator: true
+            },
+            {
+                label: 'Logout',
+                icon: 'pi pi-sign-out',
+                command: () => {
+                    this.onLogout();
+                }
+            }
+        ];
+    }
+
+    onProfileMenuToggle(event: Event) {
+        this.profileMenuActive = true;
+        this.profileMenu.toggle(event);
     }
 
     toggleDarkMode() {

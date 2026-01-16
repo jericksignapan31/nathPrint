@@ -16,7 +16,7 @@ import { User } from '@/app/models/user.model';
     standalone: true,
     imports: [CommonModule, FormsModule, CardModule, ButtonModule, InputTextModule, AvatarModule, DividerModule, TagModule],
     template: `
-        <div class="grid">
+        <div>
             <div class="col-12 lg:col-8 lg:col-offset-2">
                 <p-card>
                     <ng-template pTemplate="header">
