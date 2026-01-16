@@ -5,13 +5,11 @@ import { ChartModule } from 'primeng/chart';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { ButtonModule } from 'primeng/button';
-import { switchMap, filter } from 'rxjs/operators';
-import { OrdersService } from '@/app/services/orders.service';
-import { UserService } from '@/app/services/user.service';
 import { Order } from '@/app/models';
+import { OrdersService } from '@/app/services/orders.service';
 
 @Component({
-    selector: 'app-customer-overview',
+    selector: 'app-admin-overview',
     standalone: true,
     imports: [CommonModule, CardModule, ChartModule, TableModule, TagModule, ButtonModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -53,41 +51,41 @@ import { Order } from '@/app/models';
                         </div>
                     </div>
                     <span class="text-primary font-medium">₱{{ pendingAmount | number: '1.2-2' }}</span>
-                    <span class="text-muted-color"> to pay</span>
+                    <span class="text-muted-color"> to collect</span>
                 </div>
             </div>
 
-            <!-- Total Spent -->
+            <!-- Daily Sales -->
             <div class="col-span-12 lg:col-span-6 xl:col-span-3">
                 <div class="card mb-0">
                     <div class="flex justify-between mb-4">
                         <div>
-                            <span class="block text-muted-color font-medium mb-4">Total Spent</span>
-                            <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">₱{{ totalSpent | number: '1.2-2' }}</div>
+                            <span class="block text-muted-color font-medium mb-4">Daily Sales</span>
+                            <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">₱{{ dailySales | number: '1.2-2' }}</div>
+                        </div>
+                        <div class="flex items-center justify-center bg-cyan-100 dark:bg-cyan-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem">
+                            <i class="pi pi-chart-line text-cyan-500 text-xl!"></i>
+                        </div>
+                    </div>
+                    <span class="text-primary font-medium">{{ todayOrderCount }}</span>
+                    <span class="text-muted-color"> orders today</span>
+                </div>
+            </div>
+
+            <!-- Total Sales -->
+            <div class="col-span-12 lg:col-span-6 xl:col-span-3">
+                <div class="card mb-0">
+                    <div class="flex justify-between mb-4">
+                        <div>
+                            <span class="block text-muted-color font-medium mb-4">Total Sales</span>
+                            <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">₱{{ totalSales | number: '1.2-2' }}</div>
                         </div>
                         <div class="flex items-center justify-center bg-green-100 dark:bg-green-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem">
                             <i class="pi pi-shopping-bag text-green-500 text-xl!"></i>
                         </div>
                     </div>
                     <span class="text-primary font-medium">{{ paidOrders }}</span>
-                    <span class="text-muted-color"> orders paid</span>
-                </div>
-            </div>
-
-            <!-- Active Orders -->
-            <div class="col-span-12 lg:col-span-6 xl:col-span-3">
-                <div class="card mb-0">
-                    <div class="flex justify-between mb-4">
-                        <div>
-                            <span class="block text-muted-color font-medium mb-4">Active Orders</span>
-                            <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">{{ activeOrders }}</div>
-                        </div>
-                        <div class="flex items-center justify-center bg-cyan-100 dark:bg-cyan-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem">
-                            <i class="pi pi-spinner text-cyan-500 text-xl!"></i>
-                        </div>
-                    </div>
-                    <span class="text-primary font-medium">{{ processingOrders }}</span>
-                    <span class="text-muted-color"> in progress</span>
+                    <span class="text-muted-color"> paid orders</span>
                 </div>
             </div>
         </div>
@@ -96,10 +94,11 @@ import { Order } from '@/app/models';
         <div class="grid grid-cols-12 gap-6">
             <div class="col-span-12">
                 <p-card header="Recent Orders" [style]="{ marginBottom: '0' }">
-                    <p-table [value]="recentOrders" [rows]="5" responsiveLayout="scroll">
+                    <p-table [value]="recentOrders" [rows]="10" responsiveLayout="scroll" [paginator]="true">
                         <ng-template pTemplate="header">
                             <tr>
                                 <th>Order ID</th>
+                                <th>Customer</th>
                                 <th>Date</th>
                                 <th>Amount</th>
                                 <th>Status</th>
@@ -109,6 +108,7 @@ import { Order } from '@/app/models';
                         <ng-template pTemplate="body" let-order>
                             <tr>
                                 <td class="font-mono text-sm">{{ order.orderId }}</td>
+                                <td>{{ order.userId }}</td>
                                 <td>{{ order.createdAt | date: 'MMM dd, yyyy' }}</td>
                                 <td class="font-semibold">₱{{ order.totalAmount | number: '1.2-2' }}</td>
                                 <td>
@@ -121,7 +121,7 @@ import { Order } from '@/app/models';
                         </ng-template>
                         <ng-template pTemplate="emptymessage">
                             <tr>
-                                <td colspan="5">
+                                <td colspan="6">
                                     <div class="text-center py-8 text-gray-500">No orders yet</div>
                                 </td>
                             </tr>
@@ -132,9 +132,8 @@ import { Order } from '@/app/models';
         </div>
     `
 })
-export class CustomerOverviewComponent implements OnInit {
+export class AdminOverviewComponent implements OnInit {
     private ordersService = inject(OrdersService);
-    private userService = inject(UserService);
     private cdr = inject(ChangeDetectorRef);
 
     // Stats
@@ -142,10 +141,10 @@ export class CustomerOverviewComponent implements OnInit {
     completedOrders = 0;
     pendingPayments = 0;
     pendingAmount = 0;
-    totalSpent = 0;
+    totalSales = 0;
     paidOrders = 0;
-    activeOrders = 0;
-    processingOrders = 0;
+    dailySales = 0;
+    todayOrderCount = 0;
 
     // Recent orders
     recentOrders: Order[] = [];
@@ -155,26 +154,18 @@ export class CustomerOverviewComponent implements OnInit {
     }
 
     loadDashboardData() {
-        this.userService
-            .getCurrentUserData()
-            .pipe(
-                filter((user) => !!user?.uid),
-                switchMap((user) => {
-                    console.log('[CustomerOverview] Fetching orders for user:', user?.uid);
-                    return this.ordersService.getUserOrders(user!.uid);
-                })
-            )
-            .subscribe({
-                next: (orders: Order[]) => {
-                    console.log('[CustomerOverview] All orders:', orders);
-                    this.calculateStats(orders);
-                    this.recentOrders = orders.slice(0, 5);
-                    this.cdr.markForCheck();
-                },
-                error: (err) => {
-                    console.error('[CustomerOverview] Failed to load orders:', err);
-                }
-            });
+        console.log('[AdminOverview] Loading all orders');
+        this.ordersService.getAllOrders().subscribe({
+            next: (orders: Order[]) => {
+                console.log('[AdminOverview] All orders:', orders);
+                this.calculateStats(orders);
+                this.recentOrders = orders.slice(0, 10);
+                this.cdr.markForCheck();
+            },
+            error: (err) => {
+                console.error('[AdminOverview] Failed to load orders:', err);
+            }
+        });
     }
 
     private calculateStats(orders: Order[]) {
@@ -185,8 +176,8 @@ export class CustomerOverviewComponent implements OnInit {
         let paidCount = 0;
         let pendingPaymentCount = 0;
         let pendingAmount = 0;
-        let activeCount = 0;
-        let processingCount = 0;
+        let dailySalesAmount = 0;
+        let todayOrderCount = 0;
 
         // Get today's date at midnight for comparison
         const today = new Date();
@@ -196,21 +187,23 @@ export class CustomerOverviewComponent implements OnInit {
             // Status-based counts
             if (order.status === 'completed') {
                 completedCount++;
-            } else if (order.status === 'processing') {
-                processingCount++;
-            } else if (order.status === 'pending' || order.status === 'ready') {
-                // Only count as active if created today
-                const orderDate = new Date(order.createdAt);
-                orderDate.setHours(0, 0, 0, 0);
-                if (orderDate.getTime() === today.getTime()) {
-                    activeCount++;
-                }
             }
+
+            // Get order date
+            const orderDate = new Date(order.createdAt);
+            orderDate.setHours(0, 0, 0, 0);
+            const isToday = orderDate.getTime() === today.getTime();
 
             // Payment-based counts
             if (order.payment?.status === 'paid') {
                 paidCount++;
                 totalAmount += order.totalAmount || 0;
+
+                // Add to daily sales if created today
+                if (isToday) {
+                    dailySalesAmount += order.totalAmount || 0;
+                    todayOrderCount++;
+                }
             } else if (order.payment?.status === 'pending') {
                 pendingPaymentCount++;
                 pendingAmount += order.totalAmount || 0;
@@ -220,18 +213,19 @@ export class CustomerOverviewComponent implements OnInit {
         this.completedOrders = completedCount;
         this.pendingPayments = pendingPaymentCount;
         this.pendingAmount = pendingAmount;
-        this.totalSpent = totalAmount;
+        this.totalSales = totalAmount;
         this.paidOrders = paidCount;
-        this.activeOrders = activeCount;
-        this.processingOrders = processingCount;
+        this.dailySales = dailySalesAmount;
+        this.todayOrderCount = todayOrderCount;
 
-        console.log('[CustomerOverview] Stats calculated:', {
+        console.log('[AdminOverview] Stats calculated:', {
             totalOrders: this.totalOrders,
             completedOrders: this.completedOrders,
             pendingPayments: this.pendingPayments,
             pendingAmount: this.pendingAmount,
-            totalSpent: this.totalSpent,
-            activeOrders: this.activeOrders
+            totalSales: this.totalSales,
+            dailySales: this.dailySales,
+            todayOrderCount: this.todayOrderCount
         });
     }
 
