@@ -1,8 +1,8 @@
 {
-  "name": "NathyPrint - Printing Services Management",
-  "short_name": "NathyPrint",
+  "name": "PrintTipid App - Printing Services Management",
+  "short_name": "PrintTipid App",
   "description": "Progressive Web App for Printing Services Management System",
-  "theme_color": "#1976d2",
+  "theme_color": "#621517",
   "background_color": "#fafafa",
   "display": "standalone",
   "scope": "./",

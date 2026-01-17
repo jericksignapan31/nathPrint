@@ -18,7 +18,7 @@ export const appConfig: ApplicationConfig = {
         provideZonelessChangeDetection(),
         providePrimeNG({ theme: { preset: Aura, options: { darkModeSelector: '.app-dark' } } }),
         provideServiceWorker('ngsw-worker.js', {
-            enabled: !isDevMode(),
+            enabled: true,
             registrationStrategy: 'registerWhenStable:30000'
         }),
         // Firebase Providers
