@@ -3,11 +3,10 @@ import { StyleClassModule } from 'primeng/styleclass';
 import { Router, RouterModule } from '@angular/router';
 import { RippleModule } from 'primeng/ripple';
 import { ButtonModule } from 'primeng/button';
-import { AppFloatingConfigurator } from '@/app/layout/component/app.floatingconfigurator';
 
 @Component({
     selector: 'topbar-widget',
-    imports: [RouterModule, StyleClassModule, ButtonModule, RippleModule, AppFloatingConfigurator],
+    imports: [RouterModule, StyleClassModule, ButtonModule, RippleModule],
     styles: [
         `
             :host ::ng-deep .layout-topbar-action-highlight {
@@ -36,6 +35,19 @@ import { AppFloatingConfigurator } from '@/app/layout/component/app.floatingconf
                 letter-spacing: 1px;
                 transition: all 0.3s ease;
                 font-size: 1.45rem;
+            }
+            :host ::ng-deep .p-button.p-button-text {
+                color: var(--primary-color);
+            }
+            :host ::ng-deep .p-button.p-button-text:hover {
+                background-color: rgba(98, 21, 23, 0.1);
+            }
+            :host ::ng-deep .p-button:not(.p-button-text) {
+                background-color: var(--primary-color);
+                border-color: var(--primary-color);
+            }
+            :host ::ng-deep .p-button:not(.p-button-text):hover {
+                background-color: rgba(98, 21, 23, 0.8);
             }
         `
     ],

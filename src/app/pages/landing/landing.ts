@@ -13,7 +13,14 @@ import { FooterWidget } from './components/footerwidget';
 @Component({
     selector: 'app-landing',
     standalone: true,
-    imports: [RouterModule, TopbarWidget, HeroWidget, FeaturesWidget, HighlightsWidget , FooterWidget, RippleModule, StyleClassModule, ButtonModule, DividerModule],
+    imports: [RouterModule, TopbarWidget, HeroWidget, FeaturesWidget, HighlightsWidget, FooterWidget, RippleModule, StyleClassModule, ButtonModule, DividerModule],
+    styles: [
+        `
+            :host {
+                --primary-color: #621517;
+            }
+        `
+    ],
     template: `
         <div class="bg-surface-0 dark:bg-surface-900">
             <div id="home" class="landing-wrapper overflow-hidden">
