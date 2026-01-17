@@ -13,6 +13,7 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { OrdersService } from '@/app/services/orders.service';
 import { UserService } from '@/app/services/user.service';
 import { Order, PaperSize, ColorMode, PaperType, PaymentMethod } from '@/app/models';
+import Swal from 'sweetalert2';
 
 @Component({
     selector: 'app-new-order',
@@ -276,7 +277,13 @@ export class NewOrderComponent {
 
     onSubmit() {
         if (!this.isFormValid()) {
-            alert('Please complete required fields before submitting.');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Incomplete Form',
+                text: 'Please complete required fields before submitting.',
+                confirmButtonColor: '#621517',
+                confirmButtonText: 'OK'
+            });
             return;
         }
 
@@ -330,13 +337,26 @@ export class NewOrderComponent {
         this.ordersService.createOrder(order).subscribe({
             next: (orderId) => {
                 this.isSubmitting = false;
-                alert('Order submitted! Reference: ' + orderId);
-                this.router.navigate(['/dashboard']);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Order Submitted!',
+                    text: `Reference: ${orderId}`,
+                    confirmButtonColor: '#621517',
+                    confirmButtonText: 'Go to Dashboard'
+                }).then(() => {
+                    this.router.navigate(['/dashboard']);
+                });
             },
             error: (err) => {
                 console.error('Order submission failed', err);
                 this.isSubmitting = false;
-                alert('Failed to submit order. Please try again.');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Submission Failed',
+                    text: 'Failed to submit order. Please try again.',
+                    confirmButtonColor: '#621517',
+                    confirmButtonText: 'OK'
+                });
             }
         });
     }
