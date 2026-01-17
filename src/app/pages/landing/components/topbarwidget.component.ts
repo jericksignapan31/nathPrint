@@ -53,7 +53,7 @@ import { ButtonModule } from 'primeng/button';
     ],
     template: `
         <div class="flex items-center justify-between w-full relative">
-            <a class="layout-topbar-logo flex items-center flex-shrink-0" href="#">
+            <a class="layout-topbar-logo flex items-center shrink-0" href="#">
                 <img src="/ssc.png" alt="SSC Logo" style="height: 40px; width: auto; object-fit: contain;" />
                 <span class="px-4">PrinTipid</span>
             </a>
@@ -65,7 +65,7 @@ import { ButtonModule } from 'primeng/button';
             <div
                 [class.hidden]="!menuOpen()"
                 [class.flex]="menuOpen()"
-                class="flex-col gap-4 bg-surface-0 dark:bg-surface-900 z-50 fixed lg:static lg:flex lg:px-8 lg:py-0 lg:flex-row lg:items-center hidden lg:flex top-20 left-0 right-0 px-6 py-4"
+                class="flex-col gap-4 bg-surface-0 dark:bg-surface-900 z-50 fixed lg:static lg:flex lg:px-8 lg:py-0 lg:flex-row lg:items-center hidden top-20 left-0 right-0 px-6 py-4"
                 (click)="menuOpen.set(false)"
             >
                 <ul class="list-none p-0 m-0 flex flex-col lg:flex-row items-start lg:items-center select-none cursor-pointer gap-4 lg:gap-8">

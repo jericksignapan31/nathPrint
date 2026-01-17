@@ -26,7 +26,7 @@ import { User } from '@/app/models/user.model';
                 <!-- Notification Settings -->
                 <p-card class="mb-4">
                     <ng-template pTemplate="header">
-                        <div class="bg-gradient-to-r from-primary-500 to-primary-600 px-6 py-8 text-white w-full">
+                        <div class="bg-linear-to-r from-primary-500 to-primary-600 px-6 py-8 text-white w-full">
                             <h1 class="text-3xl font-bold m-0">Settings</h1>
                         </div>
                     </ng-template>
