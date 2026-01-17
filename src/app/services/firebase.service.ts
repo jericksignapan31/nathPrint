@@ -1,5 +1,5 @@
 import { Injectable, NgZone } from '@angular/core';
-import { Auth, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, onAuthStateChanged, User, GoogleAuthProvider, signInWithPopup } from '@angular/fire/auth';
+import { Auth, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, onAuthStateChanged, User, GoogleAuthProvider, signInWithPopup, setPersistence, browserLocalPersistence } from '@angular/fire/auth';
 import { Firestore, collection, addDoc, getDocs, query, where, updateDoc, deleteDoc, doc, QuerySnapshot, DocumentData } from '@angular/fire/firestore';
 import { Observable, from, BehaviorSubject } from 'rxjs';
 
@@ -8,17 +8,25 @@ import { Observable, from, BehaviorSubject } from 'rxjs';
 })
 export class FirebaseService {
     private currentUser$ = new BehaviorSubject<User | null>(null);
+    private authInitialized$ = new BehaviorSubject<boolean>(false);
 
     constructor(
         private auth: Auth,
         private firestore: Firestore,
         private ngZone: NgZone
     ) {
+        // Enable persistence so sessions persist across page refreshes
+        setPersistence(this.auth, browserLocalPersistence).catch((err) => {
+            console.error('Persistence configuration failed', err);
+        });
+
         // Track auth state
         this.ngZone.runOutsideAngular(() => {
             onAuthStateChanged(this.auth, (user) => {
                 this.ngZone.run(() => {
                     this.currentUser$.next(user);
+                    // Mark auth as initialized after first state change
+                    this.authInitialized$.next(true);
                 });
             });
         });
@@ -49,6 +57,10 @@ export class FirebaseService {
 
     get currentUserValue(): User | null {
         return this.currentUser$.value;
+    }
+
+    isAuthInitialized(): Observable<boolean> {
+        return this.authInitialized$.asObservable();
     }
 
     // ===== FIRESTORE - GENERIC CRUD =====
