@@ -9,6 +9,7 @@ import { RippleModule } from 'primeng/ripple';
 import { MessageModule } from 'primeng/message';
 import { CommonModule } from '@angular/common';
 import { MenuModule } from 'primeng/menu';
+import { DialogModule } from 'primeng/dialog';
 import { MenuItem } from 'primeng/api';
 import { FirebaseService } from '../../services/firebase.service';
 import { UserService } from '../../services/user.service';
@@ -17,7 +18,7 @@ import { LayoutService } from '../../layout/service/layout.service';
 @Component({
     selector: 'app-login',
     standalone: true,
-    imports: [CommonModule, ButtonModule, CheckboxModule, InputTextModule, PasswordModule, FormsModule, RouterModule, RippleModule, MessageModule, MenuModule],
+    imports: [CommonModule, ButtonModule, CheckboxModule, InputTextModule, PasswordModule, FormsModule, RouterModule, RippleModule, MessageModule, MenuModule, DialogModule],
     styles: [
         `
             :host ::ng-deep {
@@ -69,6 +70,44 @@ import { LayoutService } from '../../layout/service/layout.service';
                 span.text-primary {
                     color: #621517 !important;
                 }
+
+                .loading-modal-content {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 1.5rem;
+                    padding: 2rem;
+                }
+
+                .loading-modal-svg {
+                    width: 150px;
+                    height: 60px;
+                }
+
+                :host ::ng-deep .transparent-modal .p-dialog-mask {
+                    background-color: transparent;
+                }
+
+                :host ::ng-deep .transparent-modal .p-dialog {
+                    background-color: transparent;
+                    box-shadow: none;
+                }
+
+                :host ::ng-deep .transparent-modal .p-dialog-header {
+                    background-color: transparent;
+                    border: none;
+                    padding: 0;
+                }
+
+                :host ::ng-deep .transparent-modal .p-dialog-title {
+                    display: none;
+                }
+
+                :host ::ng-deep .transparent-modal .p-dialog-content {
+                    padding: 0;
+                    background-color: transparent;
+                }
             }
         `
     ],
@@ -78,6 +117,25 @@ import { LayoutService } from '../../layout/service/layout.service';
             <div class="fixed top-4 right-4">
                 <p-menu #colorMenu [model]="colorMenuItems" [popup]="true" [appendTo]="'body'" (onHide)="colorMenuActive = false"></p-menu>
             </div>
+
+            <!-- Loading Modal -->
+            <p-dialog [(visible)]="loading" [modal]="true" [closable]="false" [draggable]="false" header="Processing..." [style]="{ width: '400px' }" [styleClass]="'transparent-modal'">
+                <div class="loading-modal-content">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" class="loading-modal-svg">
+                        <rect fill="#FFF" width="100%" height="100%" />
+                        <rect fill="#FF156D" stroke="#FF156D" stroke-width="5" width="30" height="30" x="25" y="50">
+                            <animate attributeName="y" calcMode="spline" dur="2" values="50;120;50;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.4"></animate>
+                        </rect>
+                        <rect fill="#FF156D" stroke="#FF156D" stroke-width="5" width="30" height="30" x="85" y="50">
+                            <animate attributeName="y" calcMode="spline" dur="2" values="50;120;50;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.2"></animate>
+                        </rect>
+                        <rect fill="#FF156D" stroke="#FF156D" stroke-width="5" width="30" height="30" x="145" y="50">
+                            <animate attributeName="y" calcMode="spline" dur="2" values="50;120;50;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="0"></animate>
+                        </rect>
+                    </svg>
+                    <span class="text-surface-900 dark:text-surface-0 text-lg font-medium">Please wait...</span>
+                </div>
+            </p-dialog>
 
             <div class="flex flex-col items-center justify-center">
                 <div style="border-radius: 56px; padding: 0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)">
@@ -109,7 +167,7 @@ import { LayoutService } from '../../layout/service/layout.service';
                                 </div>
                                 <span class="font-medium no-underline ml-2 text-right cursor-pointer text-primary">Forgot password?</span>
                             </div>
-                            <p-button label="Sign In" styleClass="w-full mb-4" (onClick)="onLogin()" [loading]="loading"></p-button>
+                            <p-button label="Sign In" styleClass="w-full mb-4" (onClick)="onLogin()" [disabled]="loading"></p-button>
 
                             <div class="flex items-center mb-4">
                                 <div class="flex-1 border-t border-surface-200 dark:border-surface-700"></div>
@@ -117,7 +175,7 @@ import { LayoutService } from '../../layout/service/layout.service';
                                 <div class="flex-1 border-t border-surface-200 dark:border-surface-700"></div>
                             </div>
 
-                            <p-button label="Continue with Google" icon="pi pi-google" styleClass="w-full p-button-outlined" (onClick)="onGoogleLogin()" [loading]="loadingGoogle"> </p-button>
+                            <p-button label="Continue with Google" icon="pi pi-google" styleClass="w-full p-button-outlined" (onClick)="onGoogleLogin()" [disabled]="loadingGoogle"> </p-button>
 
                             <div class="text-center mt-4">
                                 <span class="text-muted-color">Don't have an account? </span>
@@ -250,15 +308,19 @@ export class Login {
                     if (result.user) {
                         this.userService.createUser(result.user, 'customer').subscribe({
                             next: () => {
-                                this.loading = false;
                                 this.successMessage = 'Account created successfully! Redirecting...';
-                                setTimeout(() => this.router.navigate(['/dashboard']), 1500);
+                                setTimeout(() => {
+                                    this.loading = false;
+                                    this.router.navigate(['/dashboard']);
+                                }, 3000);
                             },
                             error: (err) => {
                                 console.error('Failed to create user document', err);
-                                this.loading = false;
                                 this.successMessage = 'Account created successfully! Redirecting...';
-                                setTimeout(() => this.router.navigate(['/dashboard']), 1500);
+                                setTimeout(() => {
+                                    this.loading = false;
+                                    this.router.navigate(['/dashboard']);
+                                }, 3000);
                             }
                         });
                     }
@@ -272,9 +334,11 @@ export class Login {
             // Login existing user
             this.firebaseService.login(this.email, this.password).subscribe({
                 next: (result) => {
-                    this.loading = false;
                     this.successMessage = 'Login successful! Redirecting...';
-                    setTimeout(() => this.router.navigate(['/dashboard']), 1000);
+                    setTimeout(() => {
+                        this.loading = false;
+                        this.router.navigate(['/dashboard']);
+                    }, 3000);
                 },
                 error: (error) => {
                     this.loading = false;
@@ -292,9 +356,11 @@ export class Login {
 
         this.firebaseService.loginWithGoogle().subscribe({
             next: (result) => {
-                this.loadingGoogle = false;
                 this.successMessage = 'Login successful! Redirecting...';
-                setTimeout(() => this.router.navigate(['/dashboard']), 1000);
+                setTimeout(() => {
+                    this.loadingGoogle = false;
+                    this.router.navigate(['/dashboard']);
+                }, 3000);
             },
             error: (error) => {
                 this.loadingGoogle = false;

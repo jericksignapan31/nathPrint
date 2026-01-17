@@ -4,6 +4,8 @@ import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { StyleClassModule } from 'primeng/styleclass';
 import { MenuModule } from 'primeng/menu';
+import { DialogModule } from 'primeng/dialog';
+import Swal, { SweetAlertResult } from 'sweetalert2';
 import { AppConfigurator } from './app.configurator';
 import { LayoutService } from '@/app/layout/service/layout.service';
 import { FirebaseService } from '@/app/services/firebase.service';
@@ -12,7 +14,7 @@ import { UserService } from '@/app/services/user.service';
 @Component({
     selector: 'app-topbar',
     standalone: true,
-    imports: [RouterModule, CommonModule, StyleClassModule, MenuModule, AppConfigurator],
+    imports: [RouterModule, CommonModule, StyleClassModule, MenuModule, AppConfigurator, DialogModule],
     styles: [
         `
             :host ::ng-deep .layout-topbar-action-highlight {
@@ -42,43 +44,95 @@ import { UserService } from '@/app/services/user.service';
                 transition: all 0.3s ease;
                 font-size: 1.45rem;
             }
+            .logout-modal-content {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 1.5rem;
+                padding: 1rem;
+            }
+            .logout-modal-svg {
+                width: 150px;
+                height: 60px;
+            }
+            :host ::ng-deep .transparent-logout-modal .p-dialog-mask {
+                background-color: transparent;
+            }
+            :host ::ng-deep .transparent-logout-modal .p-dialog {
+                background-color: transparent;
+                box-shadow: none;
+            }
+            :host ::ng-deep .transparent-logout-modal .p-dialog-header {
+                background-color: transparent;
+                border: none;
+                padding: 0;
+            }
+            :host ::ng-deep .transparent-logout-modal .p-dialog-title {
+                display: none;
+            }
+            :host ::ng-deep .transparent-logout-modal .p-dialog-content {
+                padding: 0;
+                background-color: transparent;
+            }
         `
     ],
     template: ` <div class="layout-topbar">
-        <div class="layout-topbar-logo-container">
-            <button class="layout-menu-button layout-topbar-action" (click)="layoutService.onMenuToggle()">
-                <i class="pi pi-bars"></i>
-            </button>
-            <a class="layout-topbar-logo" routerLink="/">
-                <img src="/ssc.png" alt="SSC Logo" style="height: 40px; width: auto; object-fit: contain;" />
-                <span>PrinTipid</span>
-            </a>
-        </div>
+        <!-- Logout Loading Modal -->
+        <p-dialog [(visible)]="loggingOut" [modal]="true" [closable]="false" [draggable]="false" header="Logging out..." [style]="{ width: '400px' }" [styleClass]="'transparent-logout-modal'">
+            <div class="logout-modal-content">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" class="logout-modal-svg">
+                    <rect fill="#FFF" width="100%" height="100%" />
+                    <rect fill="#FF156D" stroke="#FF156D" stroke-width="5" width="30" height="30" x="25" y="50">
+                        <animate attributeName="y" calcMode="spline" dur="2" values="50;120;50;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.4"></animate>
+                    </rect>
+                    <rect fill="#FF156D" stroke="#FF156D" stroke-width="5" width="30" height="30" x="85" y="50">
+                        <animate attributeName="y" calcMode="spline" dur="2" values="50;120;50;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.2"></animate>
+                    </rect>
+                    <rect fill="#FF156D" stroke="#FF156D" stroke-width="5" width="30" height="30" x="145" y="50">
+                        <animate attributeName="y" calcMode="spline" dur="2" values="50;120;50;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="0"></animate>
+                    </rect>
+                </svg>
+                <span class="text-surface-900 dark:text-surface-0 text-lg font-medium">See you soon!</span>
+            </div>
+        </p-dialog>
 
-        <div class="layout-topbar-actions">
-            <div class="layout-config-menu">
-                <button type="button" class="layout-topbar-action" (click)="toggleDarkMode()">
-                    <i [ngClass]="{ 'pi ': true, 'pi-moon': layoutService.isDarkTheme(), 'pi-sun': !layoutService.isDarkTheme() }"></i>
+        <div class="layout-topbar">
+            <div class="layout-topbar-logo-container">
+                <button class="layout-menu-button layout-topbar-action" (click)="layoutService.onMenuToggle()">
+                    <i class="pi pi-bars"></i>
                 </button>
-                <div class="relative">
-                    <button #colorButton type="button" class="layout-topbar-action layout-topbar-action-highlight" (click)="onColorMenuToggle($event)" [attr.aria-haspopup]="true" [attr.aria-expanded]="colorMenuActive">
-                        <i class="pi pi-palette"></i>
-                    </button>
-                    <p-menu #colorMenu [model]="colorMenuItems" [popup]="true" [appendTo]="'body'" (onHide)="colorMenuActive = false"></p-menu>
-                    <app-configurator />
-                </div>
+                <a class="layout-topbar-logo" routerLink="/">
+                    <img src="/ssc.png" alt="SSC Logo" style="height: 40px; width: auto; object-fit: contain;" />
+                    <span>PrinTipid</span>
+                </a>
             </div>
 
-            <button class="layout-topbar-menu-button layout-topbar-action" pStyleClass="@next" enterFromClass="hidden" enterActiveClass="animate-scalein" leaveToClass="hidden" leaveActiveClass="animate-fadeout" [hideOnOutsideClick]="true">
-                <i class="pi pi-ellipsis-v"></i>
-            </button>
-
-            <div class="layout-topbar-menu hidden lg:block">
-                <div class="layout-topbar-menu-content">
-                    <button #profileButton type="button" class="layout-topbar-action" (click)="onProfileMenuToggle($event)" [attr.aria-haspopup]="true" [attr.aria-expanded]="profileMenuActive">
-                        <i class="pi pi-user"></i>
+            <div class="layout-topbar-actions">
+                <div class="layout-config-menu">
+                    <button type="button" class="layout-topbar-action" (click)="toggleDarkMode()">
+                        <i [ngClass]="{ 'pi ': true, 'pi-moon': layoutService.isDarkTheme(), 'pi-sun': !layoutService.isDarkTheme() }"></i>
                     </button>
-                    <p-menu #profileMenu [model]="profileMenuItems" [popup]="true" [appendTo]="'body'" (onHide)="profileMenuActive = false"></p-menu>
+                    <div class="relative">
+                        <button #colorButton type="button" class="layout-topbar-action layout-topbar-action-highlight" (click)="onColorMenuToggle($event)" [attr.aria-haspopup]="true" [attr.aria-expanded]="colorMenuActive">
+                            <i class="pi pi-palette"></i>
+                        </button>
+                        <p-menu #colorMenu [model]="colorMenuItems" [popup]="true" [appendTo]="'body'" (onHide)="colorMenuActive = false"></p-menu>
+                        <app-configurator />
+                    </div>
+                </div>
+
+                <button class="layout-topbar-menu-button layout-topbar-action" pStyleClass="@next" enterFromClass="hidden" enterActiveClass="animate-scalein" leaveToClass="hidden" leaveActiveClass="animate-fadeout" [hideOnOutsideClick]="true">
+                    <i class="pi pi-ellipsis-v"></i>
+                </button>
+
+                <div class="layout-topbar-menu hidden lg:block">
+                    <div class="layout-topbar-menu-content">
+                        <button #profileButton type="button" class="layout-topbar-action" (click)="onProfileMenuToggle($event)" [attr.aria-haspopup]="true" [attr.aria-expanded]="profileMenuActive">
+                            <i class="pi pi-user"></i>
+                        </button>
+                        <p-menu #profileMenu [model]="profileMenuItems" [popup]="true" [appendTo]="'body'" (onHide)="profileMenuActive = false"></p-menu>
+                    </div>
                 </div>
             </div>
         </div>
@@ -90,6 +144,7 @@ export class AppTopbar {
     profileMenuActive = false;
     colorMenuItems: MenuItem[] = [];
     colorMenuActive = false;
+    loggingOut = false;
 
     @ViewChild('profileMenu') profileMenu: any;
     @ViewChild('profileButton') profileButton: ElementRef | undefined;
@@ -237,15 +292,57 @@ export class AppTopbar {
     }
 
     onLogout() {
-        if (confirm('Are you sure you want to logout?')) {
-            this.firebaseService.logout().subscribe({
-                next: () => {
-                    this.router.navigate(['/auth/login']);
-                },
-                error: (err) => {
-                    console.error('Logout failed', err);
-                }
-            });
-        }
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'Do you want to logout?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#621517',
+            cancelButtonColor: '#6B7280',
+            confirmButtonText: 'Yes, logout',
+            cancelButtonText: 'Cancel'
+        }).then((result: SweetAlertResult<any>) => {
+            if (result.isConfirmed) {
+                this.loggingOut = true;
+
+                // Show loading animation
+                Swal.fire({
+                    title: 'See you soon!',
+                    html: `
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" style="width: 150px; height: 60px; margin: 1.5rem auto;">
+                            <rect fill="#FFF" width="100%" height="100%"/>
+                            <rect fill="#FF156D" stroke="#FF156D" stroke-width="5" width="30" height="30" x="25" y="50">
+                                <animate attributeName="y" calcMode="spline" dur="2" values="50;120;50;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.4"></animate>
+                            </rect>
+                            <rect fill="#FF156D" stroke="#FF156D" stroke-width="5" width="30" height="30" x="85" y="50">
+                                <animate attributeName="y" calcMode="spline" dur="2" values="50;120;50;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.2"></animate>
+                            </rect>
+                            <rect fill="#FF156D" stroke="#FF156D" stroke-width="5" width="30" height="30" x="145" y="50">
+                                <animate attributeName="y" calcMode="spline" dur="2" values="50;120;50;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="0"></animate>
+                            </rect>
+                        </svg>
+                    `,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        setTimeout(() => {
+                            this.firebaseService.logout().subscribe({
+                                next: () => {
+                                    this.loggingOut = false;
+                                    Swal.close();
+                                    this.router.navigate(['/auth/login']);
+                                },
+                                error: (err) => {
+                                    console.error('Logout failed', err);
+                                    this.loggingOut = false;
+                                    Swal.close();
+                                }
+                            });
+                        }, 3000);
+                    }
+                });
+            }
+        });
     }
 }
