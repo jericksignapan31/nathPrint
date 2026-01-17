@@ -9,18 +9,34 @@ import { PwaInstallService } from '@/app/services/pwa-install.service';
     imports: [CommonModule, ButtonModule],
     styles: [
         `
+            :host {
+                display: contents;
+            }
+
+            :host.pwa-banner-visible {
+                display: block;
+            }
+
+            :host.pwa-banner-visible::before {
+                content: '';
+                display: block;
+                height: 140px;
+            }
+
             :host ::ng-deep .pwa-install-banner {
                 position: fixed;
                 bottom: 0;
                 left: 0;
                 right: 0;
-                background: linear-gradient(90deg, rgba(98, 21, 23, 0.95), rgba(98, 21, 23, 0.85));
+                background: linear-gradient(90deg, rgba(98, 21, 23, 0.98), rgba(98, 21, 23, 0.95));
                 padding: 1.5rem 2rem;
-                box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
-                z-index: 10000;
+                box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.4);
+                z-index: 9999;
                 animation: slideUp 0.3s ease-out;
                 backdrop-filter: blur(10px);
-                pointer-events: auto;
+                pointer-events: all;
+                width: 100%;
+                box-sizing: border-box;
             }
 
             @keyframes slideUp {
